@@ -1,0 +1,17 @@
+seed: 17
+
+backbone:
+  kind: w2v_bert2
+  model_name: facebook/w2v-bert-2.0
+  revision: main  # UNPINNED DEVELOPMENT REVISION
+  hidden_layer: 24
+  freeze_backbone: true
+
+head:
+  kind: mean_dr
+  output_dim: 64
+
+scaf:
+  subcenters: 3
+  margin_rad: 0.2
+  scale: 30.0

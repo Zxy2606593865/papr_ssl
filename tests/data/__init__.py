@@ -1,0 +1,1 @@
+"""Window protocol tests."""

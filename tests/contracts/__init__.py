@@ -1,0 +1,1 @@
+"""Teacher contract tests."""

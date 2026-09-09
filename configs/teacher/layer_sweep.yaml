@@ -1,0 +1,16 @@
+backbones:
+  - kind: wav2vec2
+    base_config: configs/teacher/wav2vec2_mean.yaml
+    hidden_layers: [8, 12]
+
+  - kind: wavlm
+    base_config: configs/teacher/wavlm_mean.yaml
+    hidden_layers: [8, 12, 16, 20, 22]
+
+  - kind: w2v_bert2
+    base_config: configs/teacher/w2v_bert2_mean.yaml
+    hidden_layers: [8, 12, 16, 20, 22]
+
+# Candidate indices are exact outputs.hidden_states tuple indices.
+# T-Integration must validate each candidate against the real model. An invalid
+# candidate is recorded as INVALID_LAYER and is never clamped or substituted.
