@@ -2,6 +2,8 @@
 
 审计日期：2026-09-18（Asia/Shanghai）
 
+> 本文保留工程整理开始时的审计快照。基线收尾阶段已按用户提供的 URL 配置两个 `origin`，并以 unrelated-history merge 保留远端初始化 LICENSE；当前 remote、commit 与 push 结果以 `PAPR_BASELINE_FINALIZATION_REPORT.md` 为准。
+
 ## 1. 审计结论
 
 工作区 `D:\02_开发项目\02_AI视觉与机器人\02_语音识别` 本身不是 Git 仓库。初始扫描发现 3 个彼此独立的仓库；用户随后明确要求 `whisper/papr` 不纳入本次管理。因此本次正式整理范围是 2 个仓库：

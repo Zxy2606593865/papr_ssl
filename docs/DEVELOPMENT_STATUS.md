@@ -6,8 +6,8 @@
 
 | 能力 | 状态 | 入口 |
 | --- | --- | --- |
-| Teacher 主线 | 基本冻结 | `docs/H7_00_FINAL_FREEZE.md`、`configs/teacher/` |
-| Speech Runtime | 已完成/基本冻结 | `src/papr_ssl/inference/` |
+| Teacher Backbone / Representation | 基本冻结：WavLM-large `hidden_states[15]` → Attention DR → 256D Global / 256D Temporal | `docs/H7_00_FINAL_FREEZE.md`、`src/papr_ssl/inference/h6_raw_wav_adapter.py` |
+| H6 Speech Runtime | 已完成，作为当前 Project 1 工程基线 | `src/papr_ssl/inference/` |
 | Enrollment / Prototype / Top-3 DTW | 已完成 | `h6_personalized_runtime.py` |
 | Open-set C/W/U | 已完成 | `CWUDecisionHead` |
 | ACCEPT / CONFIRM / REJECT | 已完成 | H6 Runtime |
@@ -15,6 +15,7 @@
 | Demo Backend | 已完成 | `demo/demo05_web/app.py` |
 | Demo Frontend | Demo-05B/C v9 已完成 | `demo/demo05_web/static/` |
 | TTS Demo | 已完成 | 浏览器 Web Speech API |
+| Head V2 | 设计完成；尚未实现；尚未完成新用户/跨会话验证 | `docs/HEAD_REVIEW_AND_DESIGN_V2_20260915.md` |
 | Backend Orchestrator | 待开发 | 下一阶段 |
 | Agent Adapter / Coze | 待开发 | 从 `AGENT-A0` 编号 |
 
@@ -24,9 +25,10 @@ P6 absolute Gate 的历史结论仍为 `FAIL / BLOCKED`。H7 的 freeze/audit PA
 
 | 能力 | 状态 | 入口 |
 | --- | --- | --- |
-| 冻结 Teacher 来源 | 已存在/研究基线 | `papr_ssl` 当前 Teacher 主线 |
+| 冻结 Teacher 来源 | 已存在/研究基线 | WavLM-large `hidden_states[15]` + Attention DR |
 | Project 2 专用仓库 | 未发现纳入范围的仓库 | `PAPR-Edge-Lite` 尚未建立/确认 |
-| Teacher Target Export | 下一阶段/待开发 | `P7` |
+| Teacher Global Target | P7 待开发 | 256D float32 normalized embedding |
+| Teacher Temporal Target | P7 待开发 | `T' × 256D` float32 temporal features，shared projection，downsample=3 |
 | Student | 待开发 | 尚无纳入范围的实现 |
 | KD | 待开发 | `P8+` |
 | PCEN / LogMel | 待开发 | 尚无实现 |
@@ -54,8 +56,8 @@ P6 absolute Gate 的历史结论仍为 `FAIL / BLOCKED`。H7 的 freeze/audit PA
 
 ### Project 2
 
-1. P7：定义并导出 Teacher target contract（64D、dtype、版本、hash、manifest）。
-2. P8+：实现 PCEN/LogMel、BC-ResNet Student、Temporal/Pooling 与 KD。
+1. P7：定义并导出 Teacher Global 256D 与 Temporal `T' × 256D` target；manifest 记录 model name/revision、hidden layer、head/projection version、dtype、normalization、source audio/utt id、target type、hash 与 manifest version。
+2. P8+：实现 PCEN/LogMel、BC-ResNet Student、Temporal/Pooling 与 KD；未来可设计 Teacher 256D → KD alignment/projection → Student 64D。
 3. 在离线契约和指标通过后，再进入量化与 Edge deployment。
 
 ## 开发入口

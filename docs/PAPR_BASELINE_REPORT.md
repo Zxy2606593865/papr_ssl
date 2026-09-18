@@ -2,6 +2,8 @@
 
 报告日期：2026-09-18（Asia/Shanghai）
 
+> 收尾更新：原报告记录的是 remote 尚未提供时的基线快照。后续已按用户提供的 GitHub URL 配置两个 `origin`，并以 unrelated-history merge 保留远端初始化 LICENSE；最终 push 状态见 `PAPR_BASELINE_FINALIZATION_REPORT.md`。
+
 ## 1. 交付结论
 
 本次完成了工作区内两个获准仓库的正式工程整理与本地 Git 基线：
@@ -34,12 +36,15 @@
 - Raw WAV：`src/papr_ssl/inference/h6_raw_wav_adapter.py`
 - Demo Backend：`demo/demo05_web/app.py`
 - Demo Frontend/TTS：`demo/demo05_web/static/`
+- Teacher Backbone / Representation：WavLM-large `hidden_states[15]` → Attention DR；Global 为 256D float32 L2-normalized embedding，Temporal 为 `T' × 256D`、shared projection、downsample=3；状态为基本冻结。
 - 当前已具备 Enrollment、Prototype、Top-3 DTW、C/W/U、ACCEPT/CONFIRM/REJECT、`intent_id` 与 `canonical_text`。
+- H6 Speech Runtime 已完成，是当前 Project 1 工程基线。
+- Head V2 已完成设计，但尚未实现，也尚未完成新用户/跨会话验证。
 - Backend Orchestrator 与 Agent Adapter 尚未实现；后续编号从 `AGENT-A0` 开始。
 
 ### Project 2：PAPR-Edge-Lite
 
-当前工作区没有纳入范围的专用 Project 2 仓库。冻结 Teacher 来源位于 `papr_ssl`，但 P7 Teacher Target Export、PCEN/LogMel、BC-ResNet Student、Temporal/Pooling、KD、64D embedding、量化与 Edge Runtime 都尚未实现。
+当前工作区没有纳入范围的专用 Project 2 仓库。冻结 Teacher 来源位于 `papr_ssl`。P7 应导出 Global 256D float32 normalized embedding 与 Temporal `T' × 256D` features，并记录完整模型/投影/来源/hash/manifest 元数据；该导出尚未实现。64D 是未来 Student embedding 目标，Teacher 256D → Student 64D 的 alignment/projection 属 P8+ KD 设计。PCEN/LogMel、BC-ResNet Student、Temporal/Pooling、KD、量化与 Edge Runtime 都尚未实现。
 
 后续建议在用户确认后建立独立 `PAPR-Edge-Lite` 工程；不得自动把已排除的 `whisper/papr` 设为入口。
 
@@ -155,6 +160,6 @@ D:\anaconda3\envs\papr_ssl\python.exe -m unittest discover -s tests -v
 
 ## 10. 下一步建议
 
-1. 为两个仓库配置经确认的正式 remote 后，分别执行普通 `git push -u <remote> main`；不要 force push。
-2. Project 1 从 `AGENT-A0` 开始冻结 Runtime → Orchestrator 契约，再实现三态路由和 Agent Adapter。
-3. 用户确认 Project 2 独立仓库位置后，从 P7 Teacher Target Export 开始；先冻结维度、dtype、版本、hash 与 manifest，再进入 P8+ Student/KD。
+1. 完成本次基线收尾的普通 `git push -u origin main`；不要 force push。
+2. Project 1 下一阶段从 `AGENT-A0` 开始冻结 Runtime → Orchestrator 契约，再实现三态路由和 Agent Adapter。
+3. Project 2 下一阶段从 P7 Teacher Target Export 开始，按 Global 256D / Temporal `T' × 256D` 契约冻结元数据，再进入 P8+ Student/KD。

@@ -37,7 +37,8 @@ Speech Runtime                 Teacher target export（待开发）
 
 | 模块 | 当前位置 | 状态 |
 | --- | --- | --- |
-| Speech Runtime | `papr_ssl/src/papr_ssl/inference/h6_personalized_runtime.py`、`h6_raw_wav_adapter.py` | 已完成并冻结研究配置 |
+| Teacher Backbone / Representation | WavLM-large `hidden_states[15]`、Attention DR、256D Global / 256D Temporal | 基本冻结；来源见 `docs/H7_00_FINAL_FREEZE.md` |
+| Speech Runtime | `papr_ssl/src/papr_ssl/inference/h6_personalized_runtime.py`、`h6_raw_wav_adapter.py` | 已完成，作为当前 Project 1 工程基线 |
 | Enrollment Memory | `UserMemory`、`IntentMemory`、`EnrollmentExample`（同上） | 已完成 |
 | Prototype | `PersonalizedRuntime._candidate_evidence`（同上） | 已完成 |
 | Top-3 DTW | `PersonalizedRuntime(top_k=3)` 与 `_dtw_distance`（同上） | 已完成 |
@@ -49,6 +50,7 @@ Speech Runtime                 Teacher target export（待开发）
 | Web Backend | `papr_ssl/demo/demo05_web/app.py` | 已完成 Demo 版本 |
 | Web Frontend | `papr_ssl/demo/demo05_web/static/` | Demo-05B/C v9 已完成 |
 | TTS | `papr_ssl/demo/demo05_web/static/app.js` 的浏览器语音合成 | Demo 已完成；不是服务端 TTS |
+| Head V2 | `papr_ssl/docs/HEAD_REVIEW_AND_DESIGN_V2_20260915.md` | 设计完成；尚未实现；尚未完成新用户/跨会话验证 |
 | Backend Orchestrator | 尚无独立模块 | 下一阶段 |
 | Agent Adapter / Coze | 尚无实现；仅文档/界面文案提及 | 下一阶段，编号从 `AGENT-A0` 开始 |
 
@@ -80,9 +82,10 @@ PCEN / LogMel
 
 | 模块 | 当前位置 | 状态 |
 | --- | --- | --- |
-| 冻结 Teacher 来源 | `papr_ssl` 的冻结 Teacher 主线 | 已存在；导出契约尚未定义 |
+| 冻结 Teacher 来源 | WavLM-large `hidden_states[15]` → Attention DR | 基本冻结；P7 导出尚未实现 |
 | Project 2 专用仓库 | 工作区未发现顶层 `PAPR-Edge-Lite` 仓库 | 尚未建立/未纳入本轮 |
-| Teacher target contract/export | 尚无纳入范围的实现 | 未实现；下一阶段 |
+| Teacher Global Target | 未来 P7 export | 256D float32 normalized embedding；未实现 |
+| Teacher Temporal Target | 未来 P7 export | `T' × 256D` float32 temporal features；未实现 |
 | Student training | 尚无纳入范围的实现 | 未实现 |
 | KD | 尚无源码 | 未实现 |
 | PCEN / LogMel | 尚无源码 | 未实现 |
@@ -115,7 +118,9 @@ P7 Teacher Target Export
 | intent mapping | Audio Toolkit 的人工确认/导出 manifest | `intent_id` 与 `canonical_text` 成对冻结 |
 | Public data protocol | `papr_ssl/configs/data/`、`papr_ssl/src/papr_ssl/data/` | 配置、schema、审计脚本 |
 | Evaluation utility | 各项目保留与自身模型耦合的评估入口 | 公共指标名称对齐，不复制模型内部代码 |
-| Project 2 Teacher target | 未来由 Project 1/冻结 Teacher 导出 | 明确版本、维度、dtype、hash 和 manifest；不直接 import Teacher 内部实现 |
+| Project 2 Teacher target | 未来由 Project 1/冻结 Teacher 导出 | Global 256D + Temporal `T' × 256D`；记录 model/revision/layer/head-projection/dtype/normalization/source/target-type/hash/manifest-version |
+
+64D 是未来 Student embedding 目标维度，不是当前冻结 Teacher 的原始 target 维度。P8+ 可设计 `Teacher 256D → KD alignment/projection → Student 64D`，本轮不实现。
 
 ## 阶段编号约束
 
