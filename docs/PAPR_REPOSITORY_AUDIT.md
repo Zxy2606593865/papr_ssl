@@ -134,4 +134,4 @@ Legacy 仓库中的相似实现属于排除范围，本轮不做重复分析、�
 - `src/papr_ssl/inference/h6_personalized_runtime.py`、`demo/demo05_web/app.py`。
 - `whisper/papr` 仅用于初始发现；后续按用户要求排除。
 - `papr_audio_toolkit/docs/DEMO_03C_DATASET_CORRECTION.md`。
-- `PROJECT_CLEANUP_DRY_RUN.md` 与 `PROJECT_CLEANUP_DUPLICATES.csv`。
+- cleanup dry-run 的最终结论已归纳到 `PAPR_BASELINE_REPORT.md`；逐文件 CSV 与一次性 dry-run 报告均不再进入当前分支。

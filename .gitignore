@@ -15,9 +15,7 @@ env/
 .coverage
 htmlcov/
 .learnings/
-.ai-memory/*/
-!.ai-memory/project_memory.md
-!.ai-memory/handoff.md
+.ai-memory/
 .hypothesis/
 .tox/
 .nox/
@@ -62,9 +60,10 @@ temp/
 *.npy
 *.npz
 
-# Generated repository-cleanup inventories; keep the Markdown conclusion.
+# Generated repository-cleanup inventories and one-off reports.
 PROJECT_CLEANUP_INVENTORY.csv
 PROJECT_CLEANUP_DUPLICATES.csv
+PROJECT_CLEANUP_DRY_RUN.md
 
 # Local reference corpus; source documentation remains under docs/*.md.
 docs/论文/
