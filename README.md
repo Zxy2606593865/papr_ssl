@@ -115,13 +115,7 @@ python -m unittest discover -s tests -v
 Tests use fake models and a fake W2v-BERT feature extractor. They do not install
 packages, load datasets, download checkpoints, or train models.
 
-## Repository boundaries
 
-The local Legacy repository is:
-
-```text
-D:\02_开发项目\02_AI视觉与机器人\02_语音识别\whisper\papr
-```
 
 It is excluded from this cleanup and is not the Project-2 development entry.
 The shared audio data project is `..\papr_audio_toolkit`. PAPR-SSL does not
