@@ -1,0 +1,54 @@
+schema: papr_ssl.task_policy.v1
+
+gsc:
+  primary_view: gsc_all_35_closed_set
+  purpose: generic_ssl_embedding_screening
+  class_count: 35
+
+mdsc:
+  primary_view: mdsc_personalized_wws_10
+  task: speaker_dependent_dysarthria_wake_word_spotting
+
+  wake_words:
+    - "Hey Siri"
+    - "你好小布"
+    - "天猫精灵"
+    - "小冰小冰"
+    - "小度小度"
+    - "小德小德"
+    - "小溪你好"
+    - "小爱同学"
+    - "小艺小艺"
+    - "灵犀灵犀"
+
+  normalization:
+    remove_tokens:
+      - "<p>"
+    remove_whitespace: true
+    casefold: true
+    rewrite_raw_manifest: false
+    semantic_synonym_merging: false
+
+  personalized_scope:
+    domain:
+      - dysarthria
+    split:
+      - dev
+      - test
+    role:
+      - enrollment
+      - eval
+
+  binary_evaluation:
+    positive: canonical_wake_word
+    negative: all_other_transcripts
+
+  enrollment:
+    positive_samples: build_speaker_specific_wake_prototypes
+    nonwake_samples: negative_or_threshold_calibration_context
+
+  threshold_policy:
+    tune_on: dev
+    lock_before: test
+
+  optional_diagnostic_view: mdsc_common_30_closed_set

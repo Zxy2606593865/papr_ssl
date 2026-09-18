@@ -3,7 +3,7 @@ seed: 17
 backbone:
   kind: wav2vec2
   model_name: facebook/wav2vec2-base
-  revision: main  # UNPINNED DEVELOPMENT REVISION
+  revision: 0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8
   hidden_layer: 12
   freeze_backbone: true
 

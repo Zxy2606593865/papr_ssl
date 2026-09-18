@@ -1,0 +1,29 @@
+# PAPR-SSL P2-05B frozen public-audio preprocessing policy
+schema: papr_ssl.public_audio_policy.v1
+
+sample_rate_hz: 16000
+
+gsc_v2:
+  length_policy: fixed_container
+  container_num_samples: 16000
+  short_audio: right_zero_pad
+  long_audio: reject
+  preserve_valid_length: true
+  channel_policy: require_source_mono
+
+mdsc:
+  length_policy: full_utterance
+  crop: false
+  truncate: false
+  short_audio: preserve
+  channel_policy: mean_to_mono_in_memory
+
+batch:
+  padding: right_zero_pad_to_batch_max
+  emit_lengths: true
+  emit_waveform_mask: true
+  waveform_mask_dtype: bool
+
+raw_files:
+  rewrite: false
+  resample: false

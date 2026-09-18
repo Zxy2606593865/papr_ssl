@@ -3,7 +3,7 @@ seed: 17
 backbone:
   kind: wavlm
   model_name: microsoft/wavlm-large
-  revision: main  # UNPINNED DEVELOPMENT REVISION
+  revision: c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c
   hidden_layer: 24
   freeze_backbone: true
 

@@ -1,0 +1,132 @@
+schema: papr_ssl.p4_layer_sweep_candidates.v1
+phase: P4-01
+index_semantics: exact outputs.hidden_states tuple index; not a paper layer number
+candidate_policy: all P1-validated hidden-state indices
+selection:
+  metric: generic_dev_score
+  metric_definition: prototype_macro_f1
+  direction: maximize
+  aggregation: mean_over_seeds_17_29_43
+  confidence_interval: two-sided 95% Student-t, df=2
+  exact_mean_tie_break: lower_hidden_state_index
+  generic_test: sealed_not_accessed
+training_contract:
+  task_view: mdsc_core30_exact_phrase
+  head: mean_dr
+  embedding_dim: 64
+  l2_normalize: true
+  scaf:
+    k: 3
+    margin: 0.2
+    scale: 30
+  seeds:
+  - 17
+  - 29
+  - 43
+  epochs: 20
+  optimizer: AdamW
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  grad_clip_norm: 5.0
+  classes_per_batch: 8
+  samples_per_class: 4
+backbones:
+- name: wav2vec2_base
+  model_id: facebook/wav2vec2-base
+  model_revision: 0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8
+  hidden_state_count: 13
+  candidate_hidden_state_indices:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  final_hidden_state_index: 12
+  feature_dim: 768
+- name: wavlm_large
+  model_id: microsoft/wavlm-large
+  model_revision: c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c
+  hidden_state_count: 25
+  candidate_hidden_state_indices:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 23
+  - 24
+  final_hidden_state_index: 24
+  feature_dim: 1024
+- name: w2v_bert2
+  model_id: facebook/w2v-bert-2.0
+  model_revision: da985ba0987f70aaeb84a80f2851cfac8c697a7b
+  hidden_state_count: 25
+  candidate_hidden_state_indices:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 23
+  - 24
+  final_hidden_state_index: 24
+  feature_dim: 1024
+deferred_from_p4_selection:
+- Correct Accept Rate
+- Wrong Intent Rate
+- Known Reject Rate / FRR
+- Unknown Reject Rate / FAR
+- ACC/DET @ 1% FAR
+secondary_diagnostics_only:
+- prototype_accuracy
+- intra_class_cosine_mean
+- wrong_class_cosine_max_mean
+- top1_top2_margin_mean
+- prototype_inter_cosine_mean
+- embedding_norm_max_abs_error
+- collapsed
+- resource_cost

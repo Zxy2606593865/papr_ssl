@@ -1,0 +1,17 @@
+# Frozen after P2-06B measured native-vs-reference comparison.
+schema: papr_ssl.ssl_batching_policy.v1
+
+wav2vec2:
+  mode: grouped_exact_waveform_length
+  reason: >
+    Native raw-waveform right-padding preserved frame counts but substantially
+    changed shorter-sample hidden features relative to exact-length reference.
+
+wavlm:
+  mode: native_padded_batch
+  input_mask: waveform_mask
+
+w2v_bert2:
+  mode: native_padded_batch
+  input_mask: waveform_mask
+  raw_trim_before_feature_extractor: true

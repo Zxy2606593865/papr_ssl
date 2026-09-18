@@ -1,0 +1,22 @@
+schema: papr_ssl.teacher_training_config.v1
+phase: P3
+seed: 17
+
+backbone:
+  name: wavlm_large
+  model_id: microsoft/wavlm-large
+  model_revision: c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c
+  layer: 24
+  frozen: true
+  force_eval: true
+  use_offline_cache: true
+
+head:
+  kind: mean_dr
+  embedding_dim: 64
+  l2_normalize: true
+
+scaf:
+  k: 3
+  margin: 0.2
+  scale: 30

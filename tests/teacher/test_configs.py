@@ -22,6 +22,13 @@ class TeacherConfigTest(unittest.TestCase):
             {config["backbone"]["kind"] for config in configs},
             {"wav2vec2", "wavlm", "w2v_bert2"},
         )
+
+        expected_revisions = {
+            "wav2vec2": "0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8",
+            "wavlm": "c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c",
+            "w2v_bert2": "da985ba0987f70aaeb84a80f2851cfac8c697a7b",
+        }
+
         for config in configs:
             self.assertEqual(config["seed"], 17)
             self.assertEqual(config["head"], {"kind": "mean_dr", "output_dim": 64})
@@ -29,7 +36,13 @@ class TeacherConfigTest(unittest.TestCase):
                 config["scaf"],
                 {"subcenters": 3, "margin_rad": 0.2, "scale": 30.0},
             )
-            self.assertEqual(config["backbone"]["revision"], "main")
+
+            kind = config["backbone"]["kind"]
+            revision = config["backbone"]["revision"]
+
+            self.assertEqual(revision, expected_revisions[kind])
+            self.assertNotEqual(revision, "main")
+            self.assertEqual(len(revision), 40)
 
 
 if __name__ == "__main__":

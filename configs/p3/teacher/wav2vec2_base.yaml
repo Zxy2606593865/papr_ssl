@@ -1,0 +1,22 @@
+schema: papr_ssl.teacher_training_config.v1
+phase: P3
+seed: 17
+
+backbone:
+  name: wav2vec2_base
+  model_id: facebook/wav2vec2-base
+  model_revision: 0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8
+  layer: 12
+  frozen: true
+  force_eval: true
+  use_offline_cache: true
+
+head:
+  kind: mean_dr
+  embedding_dim: 64
+  l2_normalize: true
+
+scaf:
+  k: 3
+  margin: 0.2
+  scale: 30

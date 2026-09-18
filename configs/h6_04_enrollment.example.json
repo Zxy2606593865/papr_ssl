@@ -1,0 +1,21 @@
+{
+  "user_id": "student_001",
+  "intents": [
+    {
+      "intent_id": "drink_water",
+      "canonical_text": "我要喝水",
+      "wavs": [
+        "path/to/drink_water_01.wav",
+        "path/to/drink_water_02.wav"
+      ]
+    },
+    {
+      "intent_id": "toilet",
+      "canonical_text": "我要上厕所",
+      "wavs": [
+        "path/to/toilet_01.wav",
+        "path/to/toilet_02.wav"
+      ]
+    }
+  ]
+}

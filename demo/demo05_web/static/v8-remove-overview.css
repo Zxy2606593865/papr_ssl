@@ -1,0 +1,33 @@
+/* =========================================================
+   Demo-05B/C v8 patch
+   Remove the top overview strip and give the space to the main dashboard.
+   Append this block to the END of the v7 styles.css.
+   ========================================================= */
+
+.overview-strip{
+  display:none !important;
+}
+
+/* v7 had: header / overview / main / footer
+   v8 becomes: header / main / footer */
+.app-shell{
+  grid-template-rows:72px minmax(0,1fr) 24px !important;
+  row-gap:8px;
+}
+
+/* Lower-height laptop displays */
+@media(max-height:860px){
+  .app-shell{
+    grid-template-rows:66px minmax(0,1fr) 20px !important;
+    row-gap:6px;
+  }
+}
+
+/* Responsive fallback remains scrollable */
+@media(max-width:1320px){
+  .app-shell{
+    height:auto;
+    min-height:100dvh;
+    display:block;
+  }
+}

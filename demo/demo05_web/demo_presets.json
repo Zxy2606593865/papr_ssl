@@ -1,0 +1,79 @@
+{
+  "schema": "papr_ssl.demo05.presets.v1",
+  "student_name": "王灏",
+  "note": "Presentation presets selected from the already-frozen corrected engineering evaluation. Not a benchmark result.",
+  "presets": [
+    {
+      "id": "known_01",
+      "display_name": "个性化语音样本 01",
+      "description": "王灏真实录音 · 个性化识别演示",
+      "demo_kind": "recognition",
+      "wav_relpath": "static/audio/presets/preset_01_query_01_20260814_114957_seg_0017.wav",
+      "audio_url": "/static/audio/presets/preset_01_query_01_20260814_114957_seg_0017.wav",
+      "source_segment_id": "20260814_114957_seg_0017",
+      "source_file": "20260814_114957.WAV",
+      "expected_canonical_text": "大家好 我叫王灏",
+      "selection_note": "Frozen correct-ACCEPT query from Demo-04A-v2"
+    },
+    {
+      "id": "known_02",
+      "display_name": "个性化语音样本 02",
+      "description": "王灏真实录音 · 个性化识别演示",
+      "demo_kind": "recognition",
+      "wav_relpath": "static/audio/presets/preset_02_query_01_20260816_105942_seg_0092.wav",
+      "audio_url": "/static/audio/presets/preset_02_query_01_20260816_105942_seg_0092.wav",
+      "source_segment_id": "20260816_105942_seg_0092",
+      "source_file": "20260816_105942.WAV",
+      "expected_canonical_text": "我来自杭州市杨凌子学校",
+      "selection_note": "Frozen correct-ACCEPT query from Demo-04A-v2"
+    },
+    {
+      "id": "known_03",
+      "display_name": "个性化语音样本 03",
+      "description": "王灏真实录音 · 个性化识别演示",
+      "demo_kind": "recognition",
+      "wav_relpath": "static/audio/presets/preset_03_query_01_20260816_105942_seg_0051.wav",
+      "audio_url": "/static/audio/presets/preset_03_query_01_20260816_105942_seg_0051.wav",
+      "source_segment_id": "20260816_105942_seg_0051",
+      "source_file": "20260816_105942.WAV",
+      "expected_canonical_text": "请用微信支付宝扫码付款",
+      "selection_note": "Frozen correct-ACCEPT query from Demo-04A-v2"
+    },
+    {
+      "id": "known_04",
+      "display_name": "个性化语音样本 04",
+      "description": "王灏真实录音 · 个性化识别演示",
+      "demo_kind": "recognition",
+      "wav_relpath": "static/audio/presets/preset_04_query_01_20260816_105942_seg_0071.wav",
+      "audio_url": "/static/audio/presets/preset_04_query_01_20260816_105942_seg_0071.wav",
+      "source_segment_id": "20260816_105942_seg_0071",
+      "source_file": "20260816_105942.WAV",
+      "expected_canonical_text": "请慢用",
+      "selection_note": "Frozen correct-ACCEPT query from Demo-04A-v2"
+    },
+    {
+      "id": "known_05",
+      "display_name": "个性化语音样本 05",
+      "description": "王灏真实录音 · 个性化识别演示",
+      "demo_kind": "recognition",
+      "wav_relpath": "static/audio/presets/preset_05_query_01_20260811_132101_seg_0018.wav",
+      "audio_url": "/static/audio/presets/preset_05_query_01_20260811_132101_seg_0018.wav",
+      "source_segment_id": "20260811_132101_seg_0018",
+      "source_file": "20260811_132101.WAV",
+      "expected_canonical_text": "谢谢 祝你生活愉快",
+      "selection_note": "Frozen correct-ACCEPT query from Demo-04A-v2"
+    },
+    {
+      "id": "unknown_01",
+      "display_name": "未注册表达样本",
+      "description": "王灏真实录音 · 拒识能力演示",
+      "demo_kind": "rejection",
+      "wav_relpath": "static/audio/presets/preset_06_unknown_01_20260807_093453_seg_0093.wav",
+      "audio_url": "/static/audio/presets/preset_06_unknown_01_20260807_093453_seg_0093.wav",
+      "source_segment_id": "20260807_093453_seg_0093",
+      "source_file": "20260807_093453.WAV",
+      "expected_canonical_text": null,
+      "selection_note": "Frozen REJECT query from Demo-04A-v2"
+    }
+  ]
+}

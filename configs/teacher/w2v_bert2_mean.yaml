@@ -3,7 +3,7 @@ seed: 17
 backbone:
   kind: w2v_bert2
   model_name: facebook/w2v-bert-2.0
-  revision: main  # UNPINNED DEVELOPMENT REVISION
+  revision: da985ba0987f70aaeb84a80f2851cfac8c697a7b
   hidden_layer: 24
   freeze_backbone: true
 

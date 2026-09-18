@@ -1,0 +1,22 @@
+schema: papr_ssl.teacher_training_config.v1
+phase: P3
+seed: 17
+
+backbone:
+  name: w2v_bert2
+  model_id: facebook/w2v-bert-2.0
+  model_revision: da985ba0987f70aaeb84a80f2851cfac8c697a7b
+  layer: 24
+  frozen: true
+  force_eval: true
+  use_offline_cache: true
+
+head:
+  kind: mean_dr
+  embedding_dim: 64
+  l2_normalize: true
+
+scaf:
+  k: 3
+  margin: 0.2
+  scale: 30
