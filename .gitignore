@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 venv/
 env/
+.conda/
 
 .idea/
 .vscode/
@@ -14,6 +15,9 @@ env/
 .coverage
 htmlcov/
 .learnings/
+.ai-memory/*/
+!.ai-memory/project_memory.md
+!.ai-memory/handoff.md
 .hypothesis/
 .tox/
 .nox/
@@ -46,10 +50,21 @@ hf_cache/
 huggingface/
 transformers_cache/
 logs/
+*.log
+cache/
+caches/
 outputs/
 tmp/
 temp/
 *.tmp
+*.onnx
+*.tflite
+*.npy
+*.npz
+
+# Generated repository-cleanup inventories; keep the Markdown conclusion.
+PROJECT_CLEANUP_INVENTORY.csv
+PROJECT_CLEANUP_DUPLICATES.csv
 
 # Local reference corpus; source documentation remains under docs/*.md.
 docs/论文/
