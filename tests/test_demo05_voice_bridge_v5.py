@@ -51,6 +51,24 @@ class VoiceBridgeV5ContractTests(unittest.TestCase):
         self.assertIn("超出长语音时长", self.js)
         self.assertIn("120000", self.js)
 
+    def test_continuous_mode_supports_the_same_30_second_presentation(self):
+        self.assertIn("const CONTINUOUS_EXPLANATIONS = [", self.js)
+        self.assertIn(
+            "presentUntilOutcome(token,started,()=>outcome,CONTINUOUS_EXPLANATIONS",
+            self.js,
+        )
+        self.assertIn("长语音流程讲解结束", self.js)
+        self.assertNotIn(
+            'b.disabled=state.running||state.session==="sequence"', self.js
+        )
+        self.assertNotIn(
+            "if(state.running||state.session==='sequence')return;setMode", self.js
+        )
+
+    def test_presentation_wait_is_not_reported_as_backend_latency(self):
+        self.assertIn("接口往返", self.js)
+        self.assertNotIn("前端等待", self.js)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

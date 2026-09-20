@@ -33,6 +33,16 @@ const EXPLANATIONS = [
   ["保留不确定性", "流程说明：待确认或未识别的声音，不自动播报为确定答案。"],
   ["连接清晰表达", "流程说明：成功匹配后，规范中文可交给普通话语音合成。"]
 ];
+const CONTINUOUS_EXPLANATIONS = [
+  ["读取长语音", "流程说明：整段连续语音一次提交，不在浏览器内预先切成单句。"],
+  ["检查整段音频", "流程说明：采样率、总时长和能量帮助检查长语音质量。"],
+  ["查看频率分布", "流程说明：帧频谱来自输入音频计算，不是模型内部特征。"],
+  ["寻找候选边界", "流程说明：Continuous Phrase Spotter 在整段音频中定位候选时间范围。"],
+  ["关联已注册表达", "流程说明：只在已注册表达范围内匹配，不执行开放式长文本转写。"],
+  ["整理时间片段", "流程说明：返回片段按起止时间排序，并检查越界与异常重叠。"],
+  ["保留不确定性", "流程说明：待确认或未匹配片段不会被改写成确定结果。"],
+  ["输出识别时间轴", "流程说明：全部片段确认后，规范中文才能合并用于普通话播报。"]
+];
 const wait = ms => new Promise(resolve => setTimeout(resolve,ms));
 const show = (id,visible=true) => $(id).classList.toggle("hidden",!visible);
 const set = (id,text) => {$(id).textContent=text;};
@@ -122,7 +132,7 @@ function syncControls() {
   $("presetSelect").disabled=state.running||!state.presets.length;
   $("playOriginalBtn").disabled=!state.buffer||state.loading;
   show("cancelBtn",state.running);show("restartBtn",!state.running);
-  document.querySelectorAll(".mode-btn").forEach(b=>b.disabled=state.running||state.session==="sequence");
+  document.querySelectorAll(".mode-btn").forEach(b=>b.disabled=state.running);
   document.querySelectorAll(".session-tab").forEach(b=>b.disabled=state.running||state.loading);
   $("addQueueBtn").disabled=state.running||state.loading||!selected;
   $("fillQueueBtn").disabled=state.running||state.loading||!state.presets.some(p=>p.demo_kind==="continuous");
@@ -158,6 +168,28 @@ function resetTask() {
   [...$("stageTrack").children].forEach(e=>e.className="");
   setProgress(0);clearEvents();
   const now=new Date();set("taskId",`VB-${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${String(now.getTime()).slice(-4)}`);
+}
+
+async function presentUntilOutcome(token,started,getOutcome,explanations,presentationPrefix,instantStage) {
+  let nextStage=0;
+  while(token===state.run) {
+    const outcome=getOutcome();
+    if(outcome?.error) throw outcome.error;
+    const elapsed=performance.now()-started;
+    if(state.mode==="presentation") {
+      const progress=Math.min(elapsed/PRESENTATION_MS,1);setProgress(progress);
+      while(nextStage<explanations.length && elapsed>=nextStage*PRESENTATION_MS/explanations.length) {
+        [...$("stageTrack").children].forEach((e,i)=>e.className=i<nextStage?"done":i===nextStage?"active":"");
+        set("currentStage",`${presentationPrefix} · ${explanations[nextStage][0]}`);
+        addEvent(explanations[nextStage][1],"讲解示意","info");nextStage++;
+      }
+      if(progress>=1 && outcome) return;
+    } else {
+      set("currentStage",instantStage);set("progressText","—");
+      if(outcome) return;
+    }
+    await wait(80);
+  }
 }
 
 async function selectPreset() {
@@ -215,31 +247,14 @@ async function recognize() {
   setClosure(0,"done","已接入");setClosure(1,"active","请求中");
   setProgress(0);
   addEvent(state.mock?"已提交模拟识别请求。":"已向后端提交识别请求。","已发送");
-  let outcome=null,nextStage=0;
+  let outcome=null;
   const started=performance.now();
   // Start immediately: presentation duration is never reported as model latency.
   const pending=api(`/api/recognize/${encodeURIComponent($("presetSelect").value)}`,{method:"POST",signal:controller.signal})
     .then(result=>{outcome={result};if(token===state.run){setClosure(1,"done","已返回");addEvent(state.mock?"模拟接口已返回固定结果。":"服务端已返回结果。","已返回");}})
     .catch(error=>{outcome={error};});
   try {
-    while(token===state.run) {
-      if(outcome?.error) throw outcome.error;
-      const elapsed=performance.now()-started;
-      if(state.mode==="presentation") {
-        const progress=Math.min(elapsed/PRESENTATION_MS,1);setProgress(progress);
-        while(nextStage<EXPLANATIONS.length && elapsed>=nextStage*PRESENTATION_MS/EXPLANATIONS.length) {
-          [...$("stageTrack").children].forEach((e,i)=>e.className=i<nextStage?"done":i===nextStage?"active":"");
-          set("currentStage",`流程讲解 · ${EXPLANATIONS[nextStage][0]}`);
-          addEvent(EXPLANATIONS[nextStage][1],"讲解示意","info");nextStage++;
-        }
-        if(progress>=1 && outcome) break;
-      } else {
-        set("currentStage","后端识别请求进行中");
-        set("progressText","—");
-        if(outcome) break;
-      }
-      await wait(80);
-    }
+    await presentUntilOutcome(token,started,()=>outcome,EXPLANATIONS,"流程讲解","后端识别请求进行中");
     await pending;
     if(token!==state.run) return;
     const result=outcome.result;
@@ -355,8 +370,8 @@ function validateResult(result){
 function setMode(mode){
   state.mode=mode;document.body.dataset.mode=mode;
   document.querySelectorAll('.mode-btn').forEach(b=>{b.classList.toggle('active',b.dataset.mode===mode);b.setAttribute('aria-pressed',String(b.dataset.mode===mode));});
-  set('modeHint',state.session==='sequence'?'长语音一次提交，识别结果按时间轴显示':mode==='presentation'?'流程动画用于讲解，模型请求即时发出':'不附加展示等待，接口返回后立即显示结果');
-  set('presentationNote',state.session==='sequence'?'连续模式识别已注册表达，不等同于开放式长文本 ASR。':'流程讲解不是模型内部思维，实际耗时以接口返回为准。');
+  set('modeHint',state.session==='sequence'?(mode==='presentation'?'长语音请求即时发出，流程说明按 30 秒讲解节奏展开':'长语音一次提交，识别结果按时间轴显示'):mode==='presentation'?'流程动画用于讲解，模型请求即时发出':'不附加展示等待，接口返回后立即显示结果');
+  set('presentationNote',state.session==='sequence'?(mode==='presentation'?'长语音流程讲解不是模型内部思维；连续模式只识别已注册表达。':'连续模式识别已注册表达，不等同于开放式长文本 ASR。'):'流程讲解不是模型内部思维，实际耗时以接口返回为准。');
 }
 function renderContinuousRows(){
   const list=$('sequenceResults');list.replaceChildren();
@@ -406,14 +421,23 @@ async function recognizeContinuous(){
   if(state.running||!state.buffer||!$('presetSelect').value)return;
   clearResult();clearEvents();const token=++state.run,controller=new AbortController();state.controller=controller;state.running=true;
   const player=$('audioPlayer'),item=state.presets.find(p=>p.id===$('presetSelect').value);player.pause();player.currentTime=0;
+  [...$('stageTrack').children].forEach(e=>e.className='');
   document.body.dataset.state='running';$('resultCard').setAttribute('aria-busy','true');syncControls();
-  set('heroTitle','长语音识别请求已发送');set('heroCaption','正在处理整段连续语音；结果将按时间轴返回。');
-  set('analysisBadge','连续识别中');set('decisionBadge','处理中');set('taskStatus','处理中');set('taskBadge','长语音');set('streamState','记录中');
-  setClosure(0,'done','已接入');setClosure(1,'active','连续识别');setProgress(0);set('progressText','—');
+  set('heroTitle','长语音识别请求已发送');set('heroCaption',state.mode==='presentation'?'接口即时请求；长语音流程说明按讲解节奏展开。':'正在处理整段连续语音；结果将按时间轴返回。');
+  set('analysisBadge',state.mode==='presentation'?'讲解进行中':'连续识别中');set('decisionBadge','处理中');set('taskStatus','处理中');set('taskBadge','长语音');set('streamState','记录中');
+  setClosure(0,'done','已接入');setClosure(1,'active','连续识别');setProgress(0);if(state.mode!=='presentation')set('progressText','—');
   addEvent(`已提交长语音：${item?.display_name||item?.id||'当前样本'} / ${state.buffer.duration.toFixed(2)} 秒。`,state.mock?'模拟请求':'已发送');
+  let outcome=null;
+  const started=performance.now();
+  // Start immediately: presentation duration is never reported as backend latency.
+  const pending=continuousApi(item,controller.signal).then(validateContinuousResult)
+    .then(result=>{outcome={result,requestMs:performance.now()-started};if(token===state.run){setClosure(1,'done','已返回');addEvent(state.mock?'模拟长语音接口已返回固定结果。':'长语音接口已返回结果。','已返回');}})
+    .catch(error=>{outcome={error};});
   try{
-    const started=performance.now(),result=validateContinuousResult(await continuousApi(item,controller.signal));
+    await presentUntilOutcome(token,started,()=>outcome,CONTINUOUS_EXPLANATIONS,'长语音流程讲解','长语音识别请求进行中');
+    await pending;
     if(token!==state.run)return;
+    const result=outcome.result;
     state.continuousResults=[...result.segments].sort((a,b)=>a.start-b.start);renderContinuousRows();show('decisionWaiting',false);show('decisionResult');show('sequenceResults');
     const allAccepted=state.continuousResults.length>0&&state.continuousResults.every(r=>r.status==='ACCEPT');
     const acceptCount=state.continuousResults.filter(r=>r.status==='ACCEPT').length,confirmCount=state.continuousResults.filter(r=>r.status==='CONFIRM').length,rejectCount=state.continuousResults.filter(r=>r.status==='REJECT').length;
@@ -421,13 +445,14 @@ async function recognizeContinuous(){
     document.body.dataset.state=allAccepted?'accepted':'confirm';$('resultCard').dataset.result=allAccepted?'ACCEPT':'CONFIRM';
     set('decisionBadge',allAccepted?'已识别':'需核对');set('resultBadge',state.mock?(allAccepted?'长语音结果 · 模拟':'长语音结果 · 含不确定段'):allAccepted?'长语音识别完成':'长语音识别完成 · 含不确定段');
     set('outputLabel',allAccepted?'规范中文序列':'分段结果');set('canonicalText',allAccepted?merged:`共 ${state.continuousResults.length} 段：${acceptCount} 接受 / ${confirmCount} 待确认 / ${rejectCount} 拒识`);
-    const latency=Number.isFinite(result.latency_ms)?result.latency_ms:performance.now()-started;set('latencyText',Number.isFinite(result.latency_ms)?`${state.mock?'模拟耗时':'后端报告耗时'} ${result.latency_ms.toFixed(1)} ms`:`前端等待 ${latency.toFixed(1)} ms · 后端未提供 latency_ms`);
+    const latency=Number.isFinite(result.latency_ms)?result.latency_ms:outcome.requestMs;set('latencyText',Number.isFinite(result.latency_ms)?`${state.mock?'模拟耗时':'后端报告耗时'} ${result.latency_ms.toFixed(1)} ms`:`接口往返 ${latency.toFixed(1)} ms · 后端未提供 latency_ms`);
     state.tts=allAccepted?merged:'';$('speakBtn').disabled=!allAccepted||!supportsTts();$('copyResultBtn').disabled=!allAccepted;
     set('ttsHint',allAccepted?(supportsTts()?'全部分段均已确认，可合并播放普通话。':'全部分段均已确认，可复制规范中文。'):'存在 CONFIRM / REJECT，已阻止整段自动播报。');
     $('checkText').className=allAccepted?'done':'';$('checkText').querySelector('b').textContent=allAccepted?'已生成':'需核对';
     setClosure(1,'done',`${state.continuousResults.length} 段`);setClosure(2,allAccepted?'done':'',allAccepted?'已生成':'需核对');
     set('heroTitle',allAccepted?'长语音识别完成':'长语音识别完成 · 需要核对');set('heroCaption',`时间轴已返回：${acceptCount} ACCEPT / ${confirmCount} CONFIRM / ${rejectCount} REJECT。`);
-    set('analysisBadge','已完成');set('taskStatus','已完成');set('taskBadge','已完成');set('streamState','已完成');set('currentStage',`连续识别完成 · ${state.continuousResults.length} 个时间片段`);setProgress(1);renderVisuals(1);
+    if(state.mode==='presentation')[...$('stageTrack').children].forEach(e=>e.className='done');
+    set('analysisBadge','已完成');set('taskStatus','已完成');set('taskBadge','已完成');set('streamState','已完成');set('currentStage',state.mode==='presentation'?`长语音流程讲解结束 · ${state.continuousResults.length} 个时间片段`:`连续识别完成 · ${state.continuousResults.length} 个时间片段`);setProgress(1);renderVisuals(1);
     state.continuousResults.forEach((seg,i)=>addEvent(`第 ${i+1} 段 ${seg.start.toFixed(2)}–${seg.end.toFixed(2)}s：${seg.status}${seg.status==='ACCEPT'?` / ${seg.canonical_text}`:''}`,'时间轴',seg.status==='ACCEPT'?'ok':'warn'));
     if(allAccepted&&$('autoTts').checked)speak();
   }catch(error){if(token!==state.run)return;showError(error.message);addEvent(error.message,'长语音异常','warn');}
@@ -440,7 +465,7 @@ function bind(){
   player.addEventListener("play",()=>{set("playOriginalBtn","暂停原始语音");const paint=()=>{if(player.paused)return;renderVisuals(player.currentTime/Math.max(.01,player.duration));playbackFrame=requestAnimationFrame(paint);};cancelAnimationFrame(playbackFrame);paint();});
   for(const event of ["pause","ended"])player.addEventListener(event,()=>{cancelAnimationFrame(playbackFrame);set("playOriginalBtn","试听原始语音");});
   $("playOriginalBtn").addEventListener("click",async()=>{try{if(player.paused)await player.play();else player.pause();}catch{set("sampleDescription","浏览器未能播放音频，请检查声音输出或重试。");}});
-  document.querySelectorAll(".mode-btn").forEach(button=>button.addEventListener("click",()=>{if(state.running||state.session==='sequence')return;setMode(button.dataset.mode);}));
+  document.querySelectorAll(".mode-btn").forEach(button=>button.addEventListener("click",()=>{if(state.running)return;setMode(button.dataset.mode);}));
   document.querySelectorAll('.session-tab').forEach(button=>button.addEventListener('click',()=>switchSession(button.dataset.session)));
   $('addQueueBtn').addEventListener('click',async()=>{if(state.running||state.loading||!$('presetSelect').value)return;await selectPreset();addEvent('长语音样本已载入，可开始识别。','已准备');});
   $('fillQueueBtn').addEventListener('click',async()=>{if(state.running||state.loading)return;const item=state.presets.find(p=>p.demo_kind==='continuous');if(!item)return;$('presetSelect').value=item.id;await selectPreset();});
