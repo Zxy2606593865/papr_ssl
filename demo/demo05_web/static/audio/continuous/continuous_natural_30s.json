@@ -1,0 +1,131 @@
+{
+  "schema": "papr_ssl.continuous_demo.v1",
+  "name": "continuous_natural_30s",
+  "duration_sec": 29.07,
+  "sample_rate": 16000,
+  "phrase_count": 12,
+  "inter_phrase_gap_sec": [
+    0.18,
+    0.22,
+    0.2,
+    0.25,
+    0.17,
+    0.24,
+    0.19,
+    0.21,
+    0.26,
+    0.18,
+    0.23
+  ],
+  "final_endpoint_silence_sec": 2.2,
+  "truthfulness_note": "由真实王灏已注册演示片段工程拼接；不是一次真实的30秒自由讲话。短语间只插入约180-260ms静音。",
+  "segments": [
+    {
+      "index": 1,
+      "preset_slot": 1,
+      "source_file": "preset_01_query_01_20260814_114957_seg_0017.wav",
+      "start_sec": 0.15,
+      "end_sec": 2.06,
+      "duration_sec": 1.91,
+      "gap_after_sec": 0.18
+    },
+    {
+      "index": 2,
+      "preset_slot": 2,
+      "source_file": "preset_02_query_01_20260816_105942_seg_0092.wav",
+      "start_sec": 2.24,
+      "end_sec": 4.7,
+      "duration_sec": 2.46,
+      "gap_after_sec": 0.22
+    },
+    {
+      "index": 3,
+      "preset_slot": 3,
+      "source_file": "preset_03_query_01_20260816_105942_seg_0051.wav",
+      "start_sec": 4.92,
+      "end_sec": 7.54,
+      "duration_sec": 2.62,
+      "gap_after_sec": 0.2
+    },
+    {
+      "index": 4,
+      "preset_slot": 4,
+      "source_file": "preset_04_query_01_20260816_105942_seg_0071.wav",
+      "start_sec": 7.74,
+      "end_sec": 8.73,
+      "duration_sec": 0.99,
+      "gap_after_sec": 0.25
+    },
+    {
+      "index": 5,
+      "preset_slot": 5,
+      "source_file": "preset_05_query_01_20260811_132101_seg_0018.wav",
+      "start_sec": 8.98,
+      "end_sec": 11.01,
+      "duration_sec": 2.03,
+      "gap_after_sec": 0.17
+    },
+    {
+      "index": 6,
+      "preset_slot": 1,
+      "source_file": "preset_01_query_01_20260814_114957_seg_0017.wav",
+      "start_sec": 11.18,
+      "end_sec": 13.09,
+      "duration_sec": 1.91,
+      "gap_after_sec": 0.24
+    },
+    {
+      "index": 7,
+      "preset_slot": 2,
+      "source_file": "preset_02_query_01_20260816_105942_seg_0092.wav",
+      "start_sec": 13.33,
+      "end_sec": 15.79,
+      "duration_sec": 2.46,
+      "gap_after_sec": 0.19
+    },
+    {
+      "index": 8,
+      "preset_slot": 3,
+      "source_file": "preset_03_query_01_20260816_105942_seg_0051.wav",
+      "start_sec": 15.98,
+      "end_sec": 18.6,
+      "duration_sec": 2.62,
+      "gap_after_sec": 0.21
+    },
+    {
+      "index": 9,
+      "preset_slot": 4,
+      "source_file": "preset_04_query_01_20260816_105942_seg_0071.wav",
+      "start_sec": 18.81,
+      "end_sec": 19.8,
+      "duration_sec": 0.99,
+      "gap_after_sec": 0.26
+    },
+    {
+      "index": 10,
+      "preset_slot": 5,
+      "source_file": "preset_05_query_01_20260811_132101_seg_0018.wav",
+      "start_sec": 20.06,
+      "end_sec": 22.09,
+      "duration_sec": 2.03,
+      "gap_after_sec": 0.18
+    },
+    {
+      "index": 11,
+      "preset_slot": 1,
+      "source_file": "preset_01_query_01_20260814_114957_seg_0017.wav",
+      "start_sec": 22.27,
+      "end_sec": 24.18,
+      "duration_sec": 1.91,
+      "gap_after_sec": 0.23
+    },
+    {
+      "index": 12,
+      "preset_slot": 2,
+      "source_file": "preset_02_query_01_20260816_105942_seg_0092.wav",
+      "start_sec": 24.41,
+      "end_sec": 26.87,
+      "duration_sec": 2.46
+    }
+  ]
+}

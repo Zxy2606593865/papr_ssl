@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+  <defs>
+    <filter id="creases" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".009 .014" numOctaves="3" seed="24" result="paper"/>
+      <feDiffuseLighting in="paper" surfaceScale="28" diffuseConstant="1" lighting-color="#ffffff">
+        <feDistantLight azimuth="235" elevation="48"/>
+      </feDiffuseLighting>
+      <feComponentTransfer><feFuncR type="linear" slope=".8" intercept=".35"/><feFuncG type="linear" slope=".8" intercept=".35"/><feFuncB type="linear" slope=".8" intercept=".35"/></feComponentTransfer>
+    </filter>
+    <filter id="fibres"><feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+  </defs>
+  <rect width="1600" height="1200" fill="#fff"/>
+  <rect width="1600" height="1200" filter="url(#creases)"/>
+  <rect width="1600" height="1200" filter="url(#fibres)" opacity=".075"/>
+</svg>

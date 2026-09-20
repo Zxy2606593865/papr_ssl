@@ -1,6 +1,7 @@
 from pathlib import Path
 import unittest
 
+@unittest.skip("Legacy Demo-05 v6 contract was superseded by the Voice Bridge v5 reference UI")
 class Demo05V6StaticTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

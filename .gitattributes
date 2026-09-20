@@ -1,0 +1,4 @@
+# Preserve the byte-locked Voice Bridge v5 reference assets on every platform.
+demo/demo05_web/static/styles.css text eol=lf
+demo/demo05_web/static/presentation.js text eol=lf
+demo/demo05_web/static/assets/paper.svg text eol=lf

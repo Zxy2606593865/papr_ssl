@@ -74,6 +74,17 @@
       "source_file": "20260807_093453.WAV",
       "expected_canonical_text": null,
       "selection_note": "Frozen REJECT query from Demo-04A-v2"
+    },
+    {
+      "id": "continuous_natural_30s",
+      "display_name": "长语音测试 · 约 29 秒 · 12 个已注册短语片段",
+      "description": "王灏真实已注册短语片段工程拼接 · 连续识别演示",
+      "demo_kind": "continuous",
+      "wav_relpath": "static/audio/continuous/continuous_natural_30s.wav",
+      "audio_url": "/static/audio/continuous/continuous_natural_30s.wav",
+      "metadata_url": "/static/audio/continuous/continuous_natural_30s.json",
+      "expected_phrase_count": 12,
+      "selection_note": "Continuous demo fixture; real registered phrase clips with 180–260 ms gaps, not a single natural free-speech recording."
     }
   ]
 }

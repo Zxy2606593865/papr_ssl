@@ -231,3 +231,8 @@ def recognize_preset(preset_id: str) -> dict[str, Any]:
         "source": "王灏真实录音",
         **result,
     }
+
+
+# PAPR continuous registered-phrase spotting demo.
+from demo.demo05_web.continuous_api import install_continuous_api
+install_continuous_api(app=app, engine=engine, static_root=STATIC_ROOT)
