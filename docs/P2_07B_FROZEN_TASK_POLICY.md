@@ -1,16 +1,12 @@
-# P2-07B Frozen Task Semantics
+# P2-07B 冻结任务语义
 
-## Primary conclusion
+## 主要结论
 
-The raw MDSC manifest contains 3,858 distinct transcript strings, but these
-must not be interpreted as 3,858 wake-word classes.
+原始 MDSC manifest 包含 3,858 个不同的 transcript 字符串，但不得将其视为 3,858 个 wake-word 类别。
 
-The official MDSC description states that the corpus contains ten wake-up words
-repeated five times at different speaking rates by each speaker, together with
-non-wake-up command/phrase material.
+MDSC 官方说明指出，每位说话人以不同语速重复录制十个唤醒词各五次，此外还包含非唤醒命令/短语素材。
 
-The P2-07A inventory contains exactly ten dominant full-speaker phrases. After
-removing the explicit `<p>` pause annotation, each canonical wake phrase has:
+P2-07A 清单中恰有十个覆盖全部说话人的主要短语。移除明确的 `<p>` 停顿标注后，每个规范唤醒短语包含：
 
 ```text
 46 speakers × 5 repetitions = 230 utterances
@@ -22,9 +18,9 @@ and all ten together contain:
 10 × 230 = 2,300 wake-word utterances
 ```
 
-Therefore P2-07B freezes those ten phrases as the MDSC wake-word inventory.
+因此，P2-07B 将这十个短语冻结为 MDSC 唤醒词清单。
 
-## Ten canonical wake words
+## 十个规范唤醒词
 
 ```text
 Hey Siri
@@ -39,7 +35,7 @@ Hey Siri
 灵犀灵犀
 ```
 
-## Canonicalization boundary
+## 规范化边界
 
 Task-side normalization removes only:
 
@@ -57,16 +53,15 @@ For example:
 小<p>德<p>小<p>德 -> 小德小德
 ```
 
-No synonym merging, typo correction, semantic command normalization or raw
-manifest rewriting is permitted in P2.
+P2 阶段不得合并同义词、纠正拼写、按语义规范化命令或改写原始 manifest。
 
-## Primary MDSC task
+## MDSC 主要任务
 
 ```text
 speaker-dependent dysarthria wake-up word spotting
 ```
 
-Personalized evaluation scope:
+个性化评估范围：
 
 ```text
 domain = dysarthria
@@ -74,20 +69,18 @@ split  = dev/test
 role   = enrollment/eval
 ```
 
-Task label:
+任务标签：
 
 ```text
 one of 10 canonical wake words -> positive target
 everything else               -> __NON_WAKE__
 ```
 
-Target enrollment speech constructs speaker-specific wake prototypes.
-Non-wake enrollment material may be used as negative/calibration context but
-must never be averaged into a positive wake prototype.
+目标 enrollment 语音用于构建说话人专属的唤醒 prototype。非唤醒 enrollment 素材可以作为负例/校准上下文，但绝不能平均进正向唤醒 prototype。
 
-Thresholds are selected on development data and locked before test evaluation.
+threshold 在 development 数据上选定，并在 test 评估前锁定。
 
-## GSC task
+## GSC 任务
 
 GSC remains the generic representation-development benchmark:
 
@@ -97,7 +90,7 @@ gsc_all_35_closed_set
 
 using all 35 observed labels and official train/dev/test partitions.
 
-## Optional MDSC diagnostic view
+## 可选的 MDSC 诊断视图
 
 The 30 phrases observed across all 46 speakers are retained as:
 
@@ -105,11 +98,8 @@ The 30 phrases observed across all 46 speakers are retained as:
 mdsc_common_30_closed_set
 ```
 
-This is only a representation diagnostic view. It is not the primary final
-task and does not replace the binary personalized WWS protocol.
+这只是表征诊断视图，并非最终主要任务，也不能替代二分类个性化 WWS 协议。
 
-## Consequence for later stages
+## 对后续阶段的要求
 
-P3/P4 may use GSC and/or the common-30 view for controlled representation
-comparisons. Final MDSC qualification must use the personalized 10-wake-word
-view with non-wake evaluation speech contributing false-alarm trials.
+P3/P4 可使用 GSC 和/或 common-30 视图进行受控表征对比。MDSC 最终资格评估必须使用个性化 10-wake-word 视图，并将非唤醒评估语音计入 false-alarm trial。

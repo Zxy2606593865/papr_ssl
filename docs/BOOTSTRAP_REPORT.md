@@ -1,17 +1,14 @@
-# PAPR-SSL Bootstrap Report
+# PAPR-SSL 初始化报告
 
-## 1. New project path
+## 1. 新项目路径
 
 ```text
 D:\02_开发项目\02_AI视觉与机器人\02_语音识别\papr_ssl
 ```
 
-The directory did not exist at the mandatory preflight check. It was created as
-an independent project. The Legacy reference project under `whisper/papr` was
-read only and was not imported, copied, modified, moved, or subjected to Git
-operations during this bootstrap.
+强制预检时该目录尚不存在，因此将其创建为独立项目。本次初始化仅以只读方式参考 `whisper/papr` 下的 Legacy 项目，没有导入、复制、修改或移动该项目，也未对其执行 Git 操作。
 
-## 2. Directory tree
+## 2. 目录结构
 
 ```text
 papr_ssl/
@@ -67,16 +64,13 @@ papr_ssl/
     └── BOOTSTRAP_REPORT.md
 ```
 
-Only current Phase T0 files were created. Empty future implementation trees for
-training/evaluation/utilities were not generated.
+仅创建了当前 Phase T0 所需文件，没有生成供未来训练/评估/工具实现使用的空目录。
 
-## 3. Created files
+## 3. 创建的文件
 
-The project contains root metadata, one real Teacher YAML, a `src/` package,
-four implementation modules, package exports, six offline test modules, local
-data/artifact boundary documentation, and this report.
+项目包含根目录元数据、一个真实 Teacher YAML、一个 `src/` package、四个实现模块、package exports、六个离线测试模块、本地数据/artifact 边界说明以及本报告。
 
-The key implementation files are:
+主要实现文件包括：
 
 - `src/papr_ssl/contracts/teacher.py`
 - `src/papr_ssl/data/windowing.py`
@@ -85,53 +79,49 @@ The key implementation files are:
 - `src/papr_ssl/models/teacher/encoder.py`
 - `src/papr_ssl/losses/scaf.py`
 
-## 4. Implemented algorithms and components
+## 4. 已实现的算法与组件
 
 ### Wav2Vec2 backbone wrapper
 
-- Uses Hugging Face `AutoModel.from_pretrained` only when a model is not
-  dependency-injected.
-- Returns a selected hidden state as `[B,T,D]` plus boolean `[B,T]` frame mask.
-- Supports configurable `model_name`, `revision`, `hidden_layer`, and
-  `freeze_backbone`.
-- Validates hidden-layer range from model config when available and revalidates
-  against real runtime hidden states.
-- Defaults to frozen parameters and persistent eval mode.
-- Does not pool, project to 64D, classify, compute SCAF, or perform KD.
+- 仅当 model 未通过 dependency injection 提供时，才使用 Hugging Face `AutoModel.from_pretrained`。
+- 返回选定的 hidden state `[B,T,D]`，以及布尔型 `[B,T]` frame mask。
+- 支持配置 `model_name`、`revision`、`hidden_layer` 和 `freeze_backbone`。
+- 若 model config 中提供 hidden-layer 范围，则先据此校验，并在真实 runtime hidden states 上再次校验。
+- 默认冻结参数并保持 eval mode。
+- 不执行 pooling、不投影到 64D、不分类、不计算 SCAF，也不执行 KD。
 
-### Mean DR baseline
+### Mean DR 基线
 
-- Computes a masked mean over time.
-- Explicitly rejects an all-mask/zero-valid-frame sample.
-- Projects `D → 64` with one linear layer.
-- Rejects zero projected vectors and returns L2-normalized embeddings.
+- 沿时间维计算 masked mean。
+- 明确拒绝全 mask / 零有效帧样本。
+- 使用一个 linear layer 将 `D → 64` 投影。
+- 拒绝零投影向量，并返回 L2-normalized embedding。
 
 ### Sub-center ArcFace (SCAF)
 
-- Stores trainable centers with shape `[C,K,D]`.
-- Normalizes embeddings and centers.
-- Computes `[B,C,K]` cosine similarities and reduces only over the `K`
-  subcenters within each class.
-- Applies the angular margin only to the correct class.
-- Uses cosine clamping, stable square root, and the monotonic ArcFace fallback.
-- Returns cross-entropy loss and can return `[B,C]` logits for tests/metrics.
-- SCAF is not referenced by Teacher inference.
+- 存储形状为 `[C,K,D]` 的可训练 center。
+- 对 embedding 和 center 进行归一化。
+- 计算 `[B,C,K]` cosine similarity，并仅在每个类别内部沿 `K` 个 subcenter 归约。
+- 仅对正确类别应用 angular margin。
+- 使用 cosine 截断、稳定平方根和单调 ArcFace fallback。
+- 返回 cross-entropy loss，也可返回供测试/指标使用的 `[B,C]` logits。
+- Teacher inference 不引用 SCAF。
 
 ### TeacherEncoder
 
-- Composes a backbone and representation head only.
-- Enforces float32 `[B,16000]`, finite, `[-1,1]` input windows.
-- Returns the validated `TeacherOutput` contract.
+- 仅组合 backbone 和 representation head。
+- 强制输入窗口为 float32 `[B,16000]`、有限值且范围在 `[-1,1]`。
+- 返回通过校验的 `TeacherOutput` 契约。
 - `encode()` is no-grad; deterministic behavior is verified in eval mode with a
   fake backbone.
 
 ### Window protocol
 
-- Defines float32 `[B,16000]` waveform batches at 16 kHz.
-- Enforces finite values in `[-1,1]` and non-empty unique `sample_id` values.
-- Does not define recording, utterance, view, audio I/O, or manifest formats yet.
+- 定义 16 kHz 下的 float32 `[B,16000]` waveform batch。
+- 强制值为有限数且位于 `[-1,1]`，并要求 `sample_id` 非空且唯一。
+- 暂未定义 recording、utterance、view、audio I/O 或 manifest 格式。
 
-## 5. Explicitly NOT implemented
+## 5. 明确尚未实现的内容
 
 - WavLM, HuBERT, and Whisper Teacher
 - Attention DR
@@ -144,10 +134,9 @@ The key implementation files are:
 - Model download, feature cache, enrollment, or experiment artifacts
 - Legacy PAPR package compatibility/imports
 
-No files named `wavlm.py`, `hubert.py`, `attention_dr.py`, `kd.py`,
-`bc_resnet.py`, `adapter.py`, or `quantization.py` exist.
+不存在名为 `wavlm.py`、`hubert.py`、`attention_dr.py`、`kd.py`、`bc_resnet.py`、`adapter.py` 或 `quantization.py` 的文件。
 
-## 6. Teacher contract
+## 6. Teacher 契约
 
 Input:
 
@@ -164,10 +153,9 @@ TeacherOutput.embedding: torch.float32 [B,64]
 TeacherOutput.frame_count: integer [B]
 ```
 
-Every embedding row must be finite and L2 unit-normalized. Every frame count
-must be positive. The output contract has no Wav2Vec2, SCAF, or DR dependency.
+每行 embedding 都必须是有限值并经过 L2 单位归一化。每个 frame count 都必须为正数。输出契约不依赖 Wav2Vec2、SCAF 或 DR。
 
-## 7. Test results
+## 7. 测试结果
 
 ### Static compilation
 
@@ -176,12 +164,11 @@ python -m compileall src tests
 PASS
 ```
 
-The final compile run completed without warnings.
+最终 compile 运行完成，没有警告。
 
 ### Offline unit tests
 
-Executed with the existing `whisper_v0` Python environment, without installing
-dependencies or using its Legacy project package:
+使用现有 `whisper_v0` Python 环境执行，没有安装依赖，也没有使用其 Legacy 项目 package：
 
 | Area | Tests | Result |
 |---|---:|---|
@@ -193,10 +180,9 @@ dependencies or using its Legacy project package:
 | Mean DR masked mean/all-mask failure | 2 | PASS |
 | **Total** | **10** | **10/10 PASS** |
 
-`pyproject.toml` and `configs/teacher/wav2vec2_mean.yaml` were parsed by existing
-local interpreters: **PASS**.
+现有本地 interpreter 成功解析 `pyproject.toml` 和 `configs/teacher/wav2vec2_mean.yaml`：**PASS**。
 
-Static boundary audits:
+静态边界审计：
 
 - Import of Legacy `papr` package under `src/`, `tests/`, or configs: none.
 - Absolute Windows runtime path or `os.getcwd()` under runtime/config/tests:
@@ -204,7 +190,7 @@ Static boundary audits:
 - Dataset, artifact, checkpoint, Hugging Face cache, log, and local-learning
   ignore rules: verified.
 
-## 8. Dependency requirements
+## 8. 依赖要求
 
 Proposed in `pyproject.toml`:
 
@@ -213,10 +199,9 @@ Proposed in `pyproject.toml`:
 - Transformers `>=4.40`
 - PyYAML `>=6.0`
 
-`unittest` is used from the standard library. These are dependency proposals,
-not a lock file. No package was installed or upgraded.
+`unittest` 使用 Python 标准库。上述依赖为版本建议，并非 lock file。没有安装或升级任何 package。
 
-## 9. Network/model-download status
+## 9. 网络与模型下载状态
 
 - Network used only to read current official Transformers API documentation.
 - Wav2Vec2 model/checkpoint downloads: **not attempted**.
@@ -224,12 +209,11 @@ not a lock file. No package was installed or upgraded.
 - Real Wav2Vec2 forward smoke test: **deferred integration test**.
 - All unit tests use dependency-injected fake models/backbones.
 
-## 10. Git status
+## 10. Git 状态
 
-An independent Git repository was initialized at the new project with branch
-`main`. No file was staged, committed, pushed, or rebased.
+新项目初始化了独立 Git repository，分支为 `main`。没有暂存、提交、推送或变基任何文件。
 
-Expected bootstrap status is untracked project content:
+预期的初始化状态是项目内容均未跟踪：
 
 ```text
 ?? .gitignore
@@ -246,7 +230,7 @@ Expected bootstrap status is untracked project content:
 
 Local `.learnings/` and generated Python caches are ignored.
 
-## 11. Known risks
+## 11. 已知风险
 
 1. The real configured checkpoint has not been downloaded or executed, so its
    actual output frame count/dimension and processor mask policy still need an
@@ -264,9 +248,9 @@ Local `.learnings/` and generated Python caches are ignored.
    teacher-target serialization contract remains a later, separately tested
    deliverable.
 
-## 12. Recommended next step
+## 12. 建议的下一步
 
-Proceed in this order:
+按以下顺序推进：
 
 ```text
 real Wav2Vec2 checkpoint smoke test
@@ -276,10 +260,9 @@ real Wav2Vec2 checkpoint smoke test
 → E0 baseline qualification
 ```
 
-Do not begin KD until the real Teacher Mean DR baseline and its 64D target
-contract pass qualification.
+在真实 Teacher Mean DR 基线及其 64D target 契约通过资格确认前，不要开始 KD。
 
-Recommended initial commit message (not executed):
+建议的初始 commit message（未执行）：
 
 ```text
 feat: bootstrap PAPR-SSL Wav2Vec2 teacher baseline

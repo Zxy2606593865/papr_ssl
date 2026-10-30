@@ -1,20 +1,19 @@
-# P2-06C Safe SSL Batching Policy
+# P2-06C 安全 SSL 批处理策略
 
-## P2-06B measured result
+## P2-06B 实测结果
 
-Native right-padded batching was compared with exact-length singleton reference.
+已将原生右侧补零 batching 与精确长度 singleton reference 进行比较。
 
 ### WavLM
-PASS on GSC and MDSC.
+在 GSC 和 MDSC 上均通过。
 
 ### W2v-BERT 2.0
-PASS on GSC and MDSC after trimming each raw row to semantic length before the
-shared feature-extractor call.
+在每一行进入共享 feature-extractor 调用前，先按语义长度裁剪原始 waveform；此后在 GSC 和 MDSC 上均通过。
 
 ### Wav2Vec2
-Frame counts matched exactly, but shorter-row feature values did not.
+帧数完全匹配，但较短行的特征值不匹配。
 
-Observed examples:
+观测示例：
 
 ```text
 GSC short row
@@ -26,11 +25,9 @@ mean frame cosine ~= 0.859
 pooled cosine     ~= 0.927
 ```
 
-The longest row in each padded batch remained essentially identical to the
-singleton reference, which localizes the discrepancy to raw right-padding
-interaction rather than hidden-layer selection or frame-count conversion.
+每个 padded batch 中最长行与 singleton reference 基本一致，因此差异定位在原始右侧 padding 的相互作用，而不是 hidden-layer 选择或帧数转换。
 
-## Frozen safe policy
+## 冻结的安全策略
 
 ```text
 WavLM
@@ -49,15 +46,10 @@ Wav2Vec2
   -> feature-pad after the backbone
 ```
 
-This avoids silently accepting numerically corrupted short-sample
-representations.
+该策略避免静默接受因数值损坏而产生的短样本表示。
 
-## Performance implication
+## 性能影响
 
-For GSC this remains reasonably efficient because the majority of speech files
-have exactly 16,000 samples and can share large Wav2Vec2 batches.
+对 GSC 而言，该策略仍较有效率，因为大部分语音文件恰好为 16,000 个采样点，可以共用较大的 Wav2Vec2 batch。
 
-For highly variable-length MDSC, exact-length grouping may create many small
-Wav2Vec2 groups. That is accepted for correctness in P2. A more invasive
-"per-sample convolutional frontend, batched transformer" optimization can be
-considered later only if Wav2Vec2 remains a competitive Teacher candidate.
+对变长程度很高的 MDSC，精确长度分组可能产生许多较小的 Wav2Vec2 groups。P2 阶段为保证正确性接受这一开销。只有在 Wav2Vec2 仍是有竞争力的 Teacher 候选项时，才考虑侵入性更大的“逐样本卷积 frontend、批量 transformer”优化。

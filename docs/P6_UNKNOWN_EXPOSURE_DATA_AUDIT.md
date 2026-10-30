@@ -1,11 +1,10 @@
-# P6 Unknown Exposure Train-Side Data Audit
+# P6 未知样本暴露训练集数据审计
 
-## Goal
+## 目标
 
-Before adding an open-set training loss, first verify that the existing MDSC
-training split contains enough **non-Core30** speech to act as unknown exposure.
+在添加 open-set training loss 前，先确认现有 MDSC training split 中是否有足够的**非 Core30**语音用于未知样本暴露训练。
 
-Chinese terms:
+术语说明：
 
 - Unknown Exposure = 未知样本暴露训练
 - Known = 已知短语
@@ -13,9 +12,9 @@ Chinese terms:
 - Phrase-disjoint = 短语类别互斥
 - Leakage = 数据泄漏
 
-This step does **not** train a model.
+此步骤**不会**训练模型。
 
-## Frozen development policy
+## 已冻结的开发策略
 
 Candidate unknown exposure rows must satisfy:
 
@@ -25,7 +24,7 @@ normalized phrase NOT in Core30
 normalized phrase NOT in current open-set DEV phrase identities
 ```
 
-The script deliberately does not use generic_test for candidate selection.
+脚本有意不使用 `generic_test` 选择候选样本。
 
 It therefore reports:
 
@@ -34,28 +33,27 @@ generic_test used for selection: NO
 generic_test audio/features: NO
 ```
 
-A test-phrase overlap audit is deferred until the final model is frozen. It
-must be descriptive only and must not be used to retune the model.
+test 短语重叠审计推迟到最终模型冻结后进行。该审计只能用于描述，不能用于重新调优模型。
 
-## Run
+## 运行
 
-Normally:
+通常运行：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates.py
 python scripts/review_p6_unknown_exposure_audit.py
 ```
 
-The first script attempts to auto-discover the full MDSC JSONL manifest.
+第一个 script 会尝试自动发现完整的 MDSC JSONL manifest。
 
-If auto-discovery fails or picks the wrong file:
+如果自动发现失败或选错文件：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates.py `
   --mdsc-manifest path\to\full_mdsc_manifest.jsonl
 ```
 
-## Outputs
+## 输出
 
 ```text
 artifacts/p6_unknown_exposure_audit/
@@ -64,9 +62,9 @@ artifacts/p6_unknown_exposure_audit/
 └── unknown_exposure_phrase_summary.jsonl
 ```
 
-## What to inspect
+## 检查内容
 
-The important numbers are:
+重点检查以下数据：
 
 ```text
 candidate rows
@@ -78,5 +76,4 @@ Core30 overlap = 0
 open-set DEV phrase overlap = 0
 ```
 
-Only after these numbers are reviewed should an open-set-aware Teacher
-experiment be frozen.
+审查这些数据后，才能冻结 open-set-aware Teacher 实验方案。

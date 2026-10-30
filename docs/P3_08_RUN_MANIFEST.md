@@ -1,18 +1,16 @@
-# P3-08 — Machine-readable Run Manifest
+# P3-08 — 机器可读的 Run Manifest
 
-## Goal
+## 目标
 
-Every completed P3 seed run must leave one machine-readable provenance record:
+每个已完成的 P3 seed run 都必须生成一份机器可读的来源记录：
 
 ```text
 run_manifest.json
 ```
 
-It records the exact task/data identity, SSL revision/layer/cache, Teacher
-architecture, seed, sampler, optimization budget, metrics/checkpoint artifacts,
-selection result, code revision, environment, and sealed-test status.
+其中记录精确的 task/data identity、SSL revision/layer/cache、Teacher architecture、seed、sampler、optimization budget、metrics/checkpoint artifacts、选择结果、code revision、environment 和封存测试状态。
 
-## Per-seed run layout
+## 每个 seed 的 run 目录结构
 
 ```text
 seed_0017/
@@ -23,13 +21,11 @@ seed_0017/
 └── run_manifest.json
 ```
 
-The manifest records paths plus SHA-256 hashes instead of duplicating large
-binary artifacts.
+Manifest 记录路径与 SHA-256 hashes，不复制大型二进制 artifacts。
 
 ## Experiment fingerprint
 
-`experiment_fingerprint` excludes seed and selected-checkpoint identity. It
-therefore identifies the non-seed experimental condition:
+`experiment_fingerprint` 排除 seed 和 selected-checkpoint identity，因此用于标识不含 seed 的实验条件：
 
 ```text
 task view + task-index hash
@@ -39,7 +35,7 @@ sampler composition
 optimization budget
 ```
 
-Seed 17 / 29 / 43 must share one experiment fingerprint.
+Seed 17 / 29 / 43 必须共用一个 experiment fingerprint。
 
 ## Run fingerprint
 
@@ -50,11 +46,11 @@ seed
 selected checkpoint SHA-256
 ```
 
-so each seed run has a different run identity.
+因此每个 seed run 都有不同的 run identity。
 
-## Required integrity checks
+## 必需的完整性检查
 
-P3-08 fails if:
+出现以下任一情况时，P3-08 失败：
 
 - sampler seed differs from Teacher config seed;
 - feature-cache model/revision/layer differs from Teacher config;
@@ -64,7 +60,7 @@ P3-08 fails if:
 - P3-07 reports any generic-test access;
 - a run manifest already exists and would be overwritten.
 
-## Machine-readable provenance
+## 机器可读的来源记录
 
 The manifest includes:
 
@@ -80,7 +76,7 @@ Git commit/branch/dirty state when available
 Python / PyTorch / CUDA / platform / device
 ```
 
-## Manifest self-hash
+## Manifest 自身 Hash
 
 The semantic payload is protected by:
 
@@ -88,20 +84,19 @@ The semantic payload is protected by:
 manifest_sha256
 ```
 
-`verify_run_manifest()` recomputes it and detects later edits.
+`verify_run_manifest()` 会重新计算该值，并检测后续修改。
 
 ## Multi-seed experiment manifest
 
-After all seed runs have a `run_manifest.json`, P3-08 can create:
+所有 seed runs 均生成 `run_manifest.json` 后，P3-08 可以创建：
 
 ```text
 experiment_manifest.json
 ```
 
-It verifies that all seed runs share the exact same non-seed
-`experiment_fingerprint`.
+该文件会验证所有 seed runs 是否共享完全相同且不含 seed 的 `experiment_fingerprint`。
 
-This catches accidental changes such as:
+借此可以发现以下意外变更：
 
 ```text
 seed 17 -> layer 24
@@ -109,11 +104,11 @@ seed 29 -> layer 18
 seed 43 -> layer 24
 ```
 
-which would otherwise no longer be a valid multi-seed repetition.
+否则这些 run 就不再构成有效的 multi-seed 重复实验。
 
 ## P3-08 Gate
 
-PASS requires:
+满足以下条件时通过：
 
 1. one immutable `run_manifest.json` per completed seed run;
 2. exact Teacher config/cache identity agreement;

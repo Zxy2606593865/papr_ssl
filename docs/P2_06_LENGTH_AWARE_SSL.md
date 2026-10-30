@@ -1,22 +1,19 @@
-# P2-06A Length-Aware SSL Reference Path
+# P2-06A 长度感知 SSL 参考路径
 
-## Purpose
+## 目的
 
-P2-05B introduced semantic waveform lengths and a prefix-valid waveform mask.
-The P1 SSL wrappers were validated only for waveform-only input. P2-06A bridges
-the two without immediately modifying three already validated model-specific
-wrappers.
+P2-05B 引入了语义 waveform 长度和前缀有效 waveform mask。P1 SSL wrappers 仅针对 waveform-only 输入完成验证。P2-06A 在不立即修改三个已验证的模型专属 wrapper 的前提下，连接这两套契约。
 
-## Reference algorithm
+## 参考算法
 
-For a padded waveform batch:
+对于补齐后的 waveform batch：
 
 ```text
 waveforms [B,Tmax]
 lengths   [B]
 ```
 
-P2-06A performs:
+P2-06A 按以下方式处理：
 
 ```text
 sample i
@@ -25,7 +22,7 @@ sample i
   -> features_i [Ti,D]
 ```
 
-Then:
+随后：
 
 ```text
 pad_sequence(features_i)
@@ -35,32 +32,27 @@ feature lengths
   -> frame_mask [B,Tfeature_max]
 ```
 
-This produces exact, model-observed feature lengths for Wav2Vec2, WavLM and
-W2v-BERT 2.0 without hard-coding convolution stride formulas.
+这样可以获得 Wav2Vec2、WavLM 和 W2v-BERT 2.0 实际观测到的特征长度，无需硬编码卷积 stride 公式。
 
-## Why not native padded batching yet?
+## 为什么暂不采用原生 padded batching？
 
-This is the correctness reference implementation.
+这是用于验证正确性的参考实现。
 
-Native padded batching is faster, but requires model-specific validity
-propagation:
+原生 padded batching 更快，但需要按模型传播有效长度：
 
-- Wav2Vec2 / WavLM: raw-sample validity must be converted through the
-  convolutional frontend.
-- W2v-BERT 2.0: waveform validity must be reflected in the feature extractor's
-  frame-level attention mask.
+- Wav2Vec2 / WavLM：必须将原始采样点有效性转换并传播过卷积 frontend。
+- W2v-BERT 2.0：必须通过 feature extractor 的帧级 attention mask 反映 waveform 有效性。
 
-Before adding that optimization, the project needs a trusted reference result
-against which native batching can be compared.
+在加入该优化之前，项目需要可信的参考结果，以便与原生 batching 进行比较。
 
 ## Gate
 
-P2-06A passes only when:
+P2-06A 仅在满足以下条件时通过：
 
-1. offline adapter tests pass;
-2. real GSC short/full examples produce different valid feature lengths;
-3. real variable-length MDSC examples produce different valid feature lengths;
-4. all three pinned SSL candidates pass the same real-data smoke;
-5. all historical unit tests remain green.
+1. 离线 adapter tests 通过；
+2. 真实 GSC 短样本和完整样本产生不同的有效特征长度；
+3. 真实变长 MDSC 样本产生不同的有效特征长度；
+4. 三个固定 revision 的 SSL 候选项都通过相同的真实数据 smoke；
+5. 所有历史单元测试仍然通过。
 
-No training, SCAF update, Attention DR, KD or Student work belongs here.
+本阶段不包含训练、SCAF 更新、Attention DR、KD 或 Student 工作。

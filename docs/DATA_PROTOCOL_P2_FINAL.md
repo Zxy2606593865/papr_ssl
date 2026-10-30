@@ -1,45 +1,42 @@
-# PAPR-SSL — P2 Final Data Protocol
+# PAPR-SSL — P2 最终数据协议
 
-Status: **FROZEN**
+状态：**FROZEN**
 
-This document is the final P2 data-policy reference before P3 model training.
+本文档是 P3 模型训练开始前 P2 数据策略的最终参考。
 
-## 1. Scope
+## 1. 范围
 
-P2 defines dataset structure, task views, audio handling, batching safety, and
-evaluation roles. It does not train the representation head, SCAF head, or
-student model.
+P2 定义数据集结构、任务视图、音频处理、批处理安全策略和评估职责，不负责训练 representation head、SCAF head 或 student model。
 
-## 2. Public datasets
+## 2. 公共数据集
 
 ### GSC v2
 
-Role:
+用途：
 
-- generic keyword / embedding sanity benchmark;
-- clean standard-speech classification reference;
-- model and pipeline regression testing.
+- 通用关键词 / embedding 合理性基准；
+- 标准语音分类参考；
+- 模型和 pipeline 回归测试。
 
-Frozen task view:
+冻结的任务视图：
 
 - 35-class closed-set benchmark.
 
 ### MDSC
 
-MDSC is treated as a **multi-use dysarthria speech resource**, not as a
-wake-word-only dataset and not as a 3784-class phrase dataset.
+MDSC 被视为**多用途构音障碍语音资源**，而非仅用于 wake-word 的数据集，也不是包含 3784 个类别的短语数据集。
 
-The raw manifest remains unchanged. Task views are derived from it.
+原始 manifest 保持不变。各任务视图由该 manifest 派生。
 
-## 3. MDSC task views
+## 3. MDSC 任务视图
 
-### 3.1 MDSC-Core30 — primary public phrase benchmark
+### 3.1 MDSC-Core30 — 主要公开短语基准
 
-Purpose:
+用途：
 
-- dysarthria phrase-representation benchmark;
-- backbone/layer/head comparison;
-- Control vs Dysarthria analysis.
+- 构音障碍短语表征基准；
+- backbone/layer/head 对比；
+- Control 与 Dysarthria 分析。
 
 Definition:
 
@@ -63,15 +60,14 @@ control     2763
 dysarthria  2320
 ```
 
-The class set is justified by strong **train-side speaker coverage**. Dev/test
-are evaluation partitions and must not be used to redefine the class inventory.
+类别集合依据充分的**训练集说话人覆盖率**确定。Dev/test 是评估分区，不得用于重新定义类别清单。
 
-### 3.2 MDSC-Command20 — command-only diagnostic
+### 3.2 MDSC-Command20 — 仅命令诊断视图
 
-Purpose:
+用途：
 
-- test phrase representation without relying on wake-word semantics;
-- provide a cleaner command-recognition diagnostic.
+- 在不依赖 wake-word 语义的情况下测试短语表征；
+- 提供更清晰的命令识别诊断。
 
 Observed frozen counts:
 
@@ -87,21 +83,20 @@ control     1513
 dysarthria  1270
 ```
 
-### 3.3 MDSC-WWS10 — auxiliary personalization benchmark
+### 3.3 MDSC-WWS10 — 辅助个性化基准
 
-Purpose:
+用途：
 
-- 1-shot personalized wake-word spotting;
-- prototype / few-shot personalization analysis.
+- 1-shot 个性化 wake-word spotting；
+- prototype / few-shot 个性化分析。
 
-This is **not** the main product task and does **not** imply that the deployed
-system must use wake-word activation.
+这**不是**主要产品任务，也**不意味着**部署系统必须使用 wake-word 激活。
 
-Activation remains orthogonal to phrase recognition.
+激活机制与短语识别保持正交。
 
-### 3.4 MDSC-Core30 open-set evaluation
+### 3.4 MDSC-Core30 open-set 评估
 
-All dev/test speech outside Core30 is reserved as open-set/rejection material.
+Core30 之外的所有 dev/test 语音均保留为 open-set/rejection 素材。
 
 Observed frozen counts:
 
@@ -118,23 +113,21 @@ dysarthria  2356
 Important:
 
 ```text
-The open-set pool is NOT a supervised SCAF class.
+open-set 池不是受监督的 SCAF 类别。
 ```
 
-Unrelated long-tail utterances must not be collapsed into one metric-learning
-class, because that would force semantically unrelated speech embeddings
-together.
+不得将无关的长尾 utterance 合并为一个 metric-learning 类别，否则会迫使语义无关的语音 embedding 聚集在一起。
 
-Allowed uses:
+允许的用途：
 
 - open-set threshold calibration on dev;
 - final rejection evaluation on test;
 - hard-negative analysis;
 - future auxiliary objectives.
 
-## 4. Label semantics are task-dependent
+## 4. Label 语义取决于任务
 
-The same utterance can play different roles in different task views.
+同一条 utterance 在不同任务视图中可以承担不同角色。
 
 Example:
 
@@ -146,22 +139,20 @@ Core30 view     -> target class "打开空调"
 Open-set view   -> not open-set because it belongs to Core30
 ```
 
-Therefore labels such as `NON_WAKE` or `OPEN_SET` are **task-view labels**, not
-global semantic labels stored back into the raw manifest.
+因此，`NON_WAKE` 或 `OPEN_SET` 等标签是**任务视图标签**，而不是写回原始 manifest 的全局语义标签。
 
-## 5. Long-tail transcript policy
+## 5. 长尾转写策略
 
-The thousands of MDSC long-tail transcripts are not discarded, but P2 does not
-invent a new intent taxonomy for them.
+数千条 MDSC 长尾转写不会被丢弃，但 P2 不会为它们另行创建意图分类体系。
 
 Frozen policy:
 
-- do not create thousands of SCAF classes;
-- do not perform manual semantic merging in P2;
-- do not rewrite the raw manifest;
-- reserve them for rejection, hard negatives, and future auxiliary objectives.
+- 不创建数千个 SCAF 类别；
+- 不在 P2 阶段进行人工语义合并；
+- 不改写原始 manifest；
+- 将其保留用于拒识、hard negatives 和未来辅助目标。
 
-## 6. Audio policy
+## 6. 音频策略
 
 ### GSC
 
@@ -176,33 +167,31 @@ Frozen policy:
 - stereo -> mono by channel mean when necessary;
 - variable-length batches use right padding and waveform masks.
 
-## 7. SSL batching policy
+## 7. SSL 批处理策略
 
-Frozen safe policy:
+已冻结的安全策略：
 
 - WavLM: native padded batch;
 - W2v-BERT 2.0: semantic trim before frontend/native batching;
 - Wav2Vec2: group by exact semantic waveform length, forward each group, restore
   original order.
 
-A correct frame mask alone does not guarantee padding-invariant SSL features.
+仅有正确的 frame mask 并不能保证 SSL feature 对 padding 不敏感。
 
-## 8. Train/dev/test rule
+## 8. Train/dev/test 规则
 
-- train: fitting / supervised learning;
-- dev: model selection, calibration, thresholds;
-- test: sealed final evaluation.
+- train：拟合 / 监督学习；
+- dev：模型选择、校准和 threshold；
+- test：封存的最终评估。
 
-The test split must not be used to choose classes, thresholds, checkpoints, or
-model variants.
+不得使用 test split 选择类别、threshold、checkpoint 或模型变体。
 
-## 9. P2 closure criterion
+## 9. P2 关闭条件
 
-P2 is CLOSED only when:
+只有满足以下条件，P2 才算 CLOSED：
 
 1. the full unit-test suite passes;
 2. `mdsc_task_policy_v2_summary.json` reports `overall = PASS`;
 3. `scripts/validate_p2_final_closure.py` reports `P2 FINAL STATUS: PASS / CLOSED`.
 
-After closure, model development continues in P3 without reopening the frozen
-data semantics unless a documented data bug is discovered.
+关闭后，模型开发将在 P3 继续；除非发现有记录的数据错误，否则不得重新打开已冻结的数据语义。

@@ -1,6 +1,6 @@
-# P6 K=2 Exact Empirical Threshold Calibration
+# P6 K=2 精确经验 Threshold Calibration
 
-## Why this amendment exists
+## 修订原因
 
 The previous K=2 calibrator searched a `101 x 101` quantile grid and returned:
 
@@ -8,12 +8,11 @@ The previous K=2 calibrator searched a `101 x 101` quantile grid and returned:
 calibration_feasible = False
 ```
 
-That result proves only that no feasible threshold pair was found on the coarse
-grid. It does not prove that no empirical threshold pair exists.
+该结果仅证明粗网格上未找到可行 threshold pair，并不能证明不存在经验可行的 threshold pair。
 
-This amendment is triggered by the calibration-set result itself.
+本修订由 calibration set 的实际结果触发。
 
-## What stays frozen
+## 保持冻结的内容
 
 ```text
 Backbone             WavLM-large
@@ -27,9 +26,9 @@ Gate thresholds      unchanged
 generic_test         sealed
 ```
 
-Only the threshold search resolution changes.
+只调整 threshold search 的分辨率。
 
-## Exact empirical search
+## 精确经验搜索
 
 Decision rule:
 
@@ -40,8 +39,7 @@ AND
 margin >= margin_threshold
 ```
 
-On a finite calibration set, the accept/reject partition changes only when a
-threshold crosses an observed score or margin.
+在有限 calibration set 上，只有当 threshold 越过某个已观测的 score 或 margin 时，accept/reject 划分才会改变。
 
 Therefore the exact candidate set is:
 
@@ -57,30 +55,29 @@ all unique observed margin values
 + one boundary above max
 ```
 
-This enumerates every distinct empirical decision partition expressible by the
-two-threshold policy.
+该方法枚举双 threshold policy 能表示的所有不同经验决策划分。
 
-## Run
+## 运行
 
-First export frozen per-sample dev scores:
+先导出冻结的逐样本 dev scores：
 
 ```powershell
 python scripts/export_p6_k2_dev_scores.py --device cuda
 ```
 
-Then run exact calibration:
+然后执行精确校准：
 
 ```powershell
 python scripts/run_p6_k2_exact_calibration.py
 ```
 
-Then audit:
+之后进行审计：
 
 ```powershell
 python scripts/audit_p6_k2_exact_calibration.py
 ```
 
-Interpretation:
+结果解读：
 
 - If `calibration_feasible=False` again, the current K=2 two-threshold policy
   truly has no empirical feasible point on `generic_dev_cal`.

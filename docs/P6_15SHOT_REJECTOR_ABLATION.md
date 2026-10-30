@@ -1,16 +1,16 @@
-# P6 15-shot lightweight rejector ablation
+# P6 15-shot 轻量拒识器消融实验
 
-## Why this experiment comes next
+## 为什么下一步进行此实验
 
-The frozen 15-shot system has already shown:
+已冻结的 15-shot 系统表现出：
 
 - strong known-intent discrimination,
 - very low Wrong Intent,
 - unstable Known/Unknown separation.
 
-The Teacher itself is therefore not changed in this experiment.
+因此，本实验不会更改 Teacher 本身。
 
-## Frozen components
+## 已冻结的组件
 
 ```text
 WavLM-large hidden_states[15]
@@ -19,7 +19,7 @@ AttentionDR -> 64D
 top-1 intent prediction
 ```
 
-## Only changed component
+## 唯一变更的组件
 
 Old rejection rule:
 
@@ -45,7 +45,7 @@ P(KNOWN)
 one calibrated probability threshold
 ```
 
-Chinese interpretation:
+术语说明：
 
 - Logistic regression = 逻辑回归
 - Rejector = 拒识器
@@ -53,10 +53,9 @@ Chinese interpretation:
 - Known = 已知短语
 - Unknown = 未知短语
 
-The rejector is deliberately tiny. It tests whether the problem is mainly the
-shape of the decision boundary rather than the 64D representation.
+拒识器刻意保持轻量，用于检验问题是否主要来自决策边界形状，而非 64D 表征。
 
-## Scientific control
+## 实验控制
 
 - Same 20 repeated DEV splits.
 - Rejector fits only on each calibration half.
@@ -65,21 +64,17 @@ shape of the decision boundary rather than the 64D representation.
 - No generic_test access.
 - Intent class prediction itself is never changed.
 
-## Run
+## 运行
 
-The previous 15-shot all-DEV score export and repeated-split baseline must
-already exist.
+此前的 15-shot 全 DEV 分数导出和重复 split 基线必须已经生成。
 
 ```powershell
 python scripts/run_p6_15shot_rejector_ablation.py
 python scripts/audit_p6_15shot_rejector_ablation.py
 ```
 
-## Decision rule after this experiment
+## 本实验后的决策规则
 
-If the learned rejector materially improves Correct Accept / Unknown Reject and
-raises repeated-split Gate pass rate, keep the Teacher frozen and develop the
-decision layer.
+如果学习得到的拒识器明显提升 Correct Accept / Unknown Reject，并提高重复 split 的 Gate 通过率，则保持 Teacher 冻结并继续开发决策层。
 
-If the improvement is small or Gate pass rate remains near zero, stop tuning the
-decision layer and move to open-set-aware representation training.
+如果提升有限，或 Gate 通过率仍接近零，则停止调优决策层，转向 open-set-aware 表征训练。

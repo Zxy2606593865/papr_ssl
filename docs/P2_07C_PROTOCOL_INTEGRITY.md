@@ -1,11 +1,10 @@
-# P2-07C Personalized MDSC Protocol Integrity
+# P2-07C 个性化 MDSC 协议完整性
 
-This is the final P2 gate before Teacher experiments.
+这是 Teacher 实验之前的最后一个 P2 Gate。
 
-The frozen P2-07B task assumes speaker-specific enrollment prototypes. Therefore
-the dataset must actually support that protocol at the speaker level.
+冻结的 P2-07B task 假设每个 speaker 都有自己的 enrollment prototypes。因此，数据集必须确实支持 speaker 级别的该协议。
 
-The validator checks:
+Validator 检查以下条件：
 
 ```text
 8 personalized dysarthria speakers
@@ -16,11 +15,9 @@ all 10 wake words present in eval for every speaker
 non-wake eval trials present for every speaker
 ```
 
-It also reports the observed number of enrollment/eval repetitions per wake
-without hard-coding those counts into the feasibility gate.
+它也会报告每个 wake 在 enrollment/eval 中观测到的重复次数，但不会把次数硬编码进可行性 Gate。
 
-A PASS means the public dataset and frozen task semantics are sufficient to
-construct the later protocol:
+PASS 表示公开数据集和冻结的 task 语义足以构建后续协议：
 
 ```text
 speaker enrollment
@@ -31,4 +28,4 @@ eval non-wake
     -> false-alarm / rejection trials
 ```
 
-Threshold tuning remains development-only; test remains locked.
+Threshold 调优仅可使用 development 数据；test 仍保持封存。

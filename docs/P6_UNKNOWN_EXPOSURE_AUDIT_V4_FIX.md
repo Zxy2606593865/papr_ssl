@@ -1,6 +1,6 @@
-# P6 Unknown Exposure Audit v4 — `task_label` schema fix
+# P6 Unknown Exposure Audit v4 — `task_label` Schema 修复
 
-The v3 log exposed the actual task-row schema:
+v3 日志显示了实际 task-row schema：
 
 ```text
 {
@@ -12,26 +12,26 @@ The v3 log exposed the actual task-row schema:
 }
 ```
 
-So the phrase text is stored in `task_label`, not `label` / `label_text`.
+因此，短语文本存储在 `task_label`，而非 `label` / `label_text`。
 
-v4 adds `task_label` as the highest-priority phrase field for:
+v4 将 `task_label` 设为以下场景中优先级最高的短语字段：
 - Core30 task rows,
 - open-set task rows,
 - tolerant raw-manifest parsing.
 
-It still:
+同时仍然：
 - loads Core30 from train+dev only,
 - loads open-set only from dev,
 - does not access generic_test audio/features.
 
-Run:
+运行：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates_v4.py
 python scripts/review_p6_unknown_exposure_audit_v4.py
 ```
 
-Outputs:
+输出：
 
 ```text
 artifacts/p6_unknown_exposure_audit_v4/

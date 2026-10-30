@@ -1,9 +1,8 @@
-# P3 Scientific Gate — Real Experiment 01
+# P3 科研 Gate — 真实实验 01
 
-This is **not P3-09**. P3-01 through P3-08 are already the complete engineering
-plan. This document executes those contracts on real data.
+这**不是 P3-09**。P3-01 至 P3-08 已构成完整工程计划。本文件使用真实数据执行这些契约。
 
-## First real condition
+## 首个真实实验条件
 
 ```text
 Task:      MDSC-Core30
@@ -17,25 +16,21 @@ Seed:      17 first
 Test:      sealed
 ```
 
-The frozen Core30 policy contains 3756 train and 442 dev utterances across 30
-classes. The first real cache contains train+dev only; the Core30 test audio is
-not materialized for P3 model development.
+冻结的 Core30 policy 在 30 个 classes 中包含 3756 条 train utterances 和 442 条 dev utterances。首份真实 cache 只包含 train+dev；P3 模型开发不会物化 Core30 test audio。
 
-## Why Wav2Vec2 first?
+## 为什么先使用 Wav2Vec2？
 
-The goal is to validate one real end-to-end P3 condition before expanding the
-matrix. Wav2Vec2-base is the smallest of the three P1 backbones and its final
-hidden-state index is already frozen and validated.
+目标是在扩大实验矩阵前，先验证一套端到端 P3 真实条件。Wav2Vec2-base 是三个 P1 backbones 中最小的一个，其最终 hidden-state index 已冻结并验证。
 
-## Step 1 — preflight
+## Step 1 — Preflight
 
-From the project root:
+在项目根目录运行：
 
 ```powershell
 python scripts/preflight_p3_real_run01.py --check-all-audio
 ```
 
-Expected:
+预期结果：
 
 ```text
 train rows: 3756
@@ -44,15 +39,15 @@ classes:    30
 REAL RUN 01 PREFLIGHT: PASS
 ```
 
-The default MDSC root is:
+默认 MDSC 根目录为：
 
 ```text
 datasets/public/mdsc
 ```
 
-Override `--mdsc-root` only if your local P2 audit uses another location.
+仅当本地 P2 audit 使用其他位置时，才覆盖 `--mdsc-root`。
 
-## Step 2 — materialize the real SSL cache
+## Step 2 — 物化真实 SSL Cache
 
 ```powershell
 python scripts/materialize_p3_core30_wav2vec2_cache.py `
@@ -61,9 +56,7 @@ python scripts/materialize_p3_core30_wav2vec2_cache.py `
   --batch-size 4
 ```
 
-Important: Wav2Vec2 is forwarded only in exact semantic waveform-length groups.
-No right-padding is introduced into the SSL forward, matching the safe P2-06
-policy.
+注意：Wav2Vec2 仅对语义 waveform 长度完全相同的 groups 执行 forward。SSL forward 不添加右侧 padding，与安全的 P2-06 policy 一致。
 
 The cache is written under:
 
@@ -72,10 +65,9 @@ artifacts/ssl_feature_cache/
 facebook__wav2vec2-base__rev-0b5b8e868dd8__layer-12__masked-mean-f32/
 ```
 
-Do not regenerate the cache for seed 29/43. The SSL backbone is frozen, so all
-three seeds reuse exactly this cache.
+不要为 seed 29/43 重新生成 cache。SSL backbone 已冻结，因此三个 seeds 完全复用此 cache。
 
-If CUDA memory is insufficient, lower:
+如果 CUDA 显存不足，请调低：
 
 ```text
 --batch-size 4
@@ -84,13 +76,13 @@ If CUDA memory is insufficient, lower:
 to `2` or `1`. This changes throughput, not the semantic feature definition,
 because every chunk contains only equal-length waveforms and no padding.
 
-## Step 3 — first real Teacher run
+## Step 3 — 首个真实 Teacher Run
 
 ```powershell
 python scripts/run_p3_core30_wav2vec2_seed17.py --device cuda
 ```
 
-This performs:
+该命令依次执行：
 
 ```text
 untrained random 64D projection baseline
@@ -106,11 +98,9 @@ checkpoint SHA-256 validation
 P3-08 run_manifest.json
 ```
 
-The baseline and trained model use the same cached SSL features and the same
-seed-17 random initialization before training. Therefore the comparison isolates
-the effect of Mean DR + SCAF learning.
+Baseline 与训练后的模型使用相同的缓存 SSL features，并在训练前采用相同的 seed-17 随机初始化。因此，该比较只衡量 Mean DR + SCAF 学习带来的影响。
 
-Outputs:
+输出：
 
 ```text
 artifacts/p3_runs/
@@ -125,21 +115,20 @@ artifacts/p3_runs/
         └── run_manifest.json
 ```
 
-## Interpretation
+## 结果解读
 
-Do not declare the overall P3 scientific gate after seed 17.
+完成 seed 17 后，不要宣布 P3 科研 Gate 整体通过。
 
-Seed 17 answers only:
+Seed 17 只能回答：
 
 > Can the real Core30 + Wav2Vec2 baseline train successfully and improve over
 > its own untrained projection?
 
-If it succeeds, run the same frozen experiment with seeds 29 and 43. The P3
-scientific conclusion must use the three-seed result, not the best single seed.
+若实验成功，应使用 seeds 29 和 43 运行相同的冻结实验。P3 科研结论必须依据三个 seeds 的结果，而不是最佳的单个 seed。
 
-## Scientific gate evidence to collect
+## 需要收集的科研 Gate 证据
 
-For the real run, verify:
+对真实 run 验证：
 
 ```text
 finite train loss
@@ -153,5 +142,4 @@ run manifest
 generic_test sealed
 ```
 
-Only after the three seeds are complete should the project decide whether this
-Backbone/Layer satisfies the P3 scientific gate.
+三个 seeds 全部完成后，才能决定该 Backbone/Layer 是否满足 P3 科研 Gate。

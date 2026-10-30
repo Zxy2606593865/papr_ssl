@@ -1,8 +1,8 @@
-# P6 — Teacher E0 / E0b development qualification
+# P6 — Teacher E0 / E0b 开发集资格评估
 
-This bundle intentionally stops before `generic_test`.
+本方案有意止步于 `generic_test` 之前。
 
-It implements P6-01 through P6-06 only:
+仅实现 P6-01 至 P6-06：
 
 ```text
 P6-01  generic_enrollment -> prototype, primary K=1
@@ -13,14 +13,13 @@ P6-05  E0b head-variant non-degradation Gate
 P6-06  freeze Teacher/checkpoint/threshold/code state
 ```
 
-`P6-07 generic_test` is deliberately not included here so test cannot be
-accidentally accessed before the freeze.
+此处有意不包含 `P6-07 generic_test`，避免冻结前意外访问 test。
 
-## Frozen checkpoint policy
+## 冻结的 Checkpoint 策略
 
-P5 produced 3 Attention checkpoints and 3 Mean checkpoints.
+P5 生成了 3 个 Attention checkpoints 和 3 个 Mean checkpoints。
 
-P6 must qualify one actual checkpoint, not an average imaginary model.
+P6 必须评估一个真实 checkpoint，而不是虚构的平均模型。
 
 The representative checkpoint is selected before P6 scoring as:
 
@@ -28,11 +27,11 @@ The representative checkpoint is selected before P6 scoring as:
 median selected-dev score among seeds 17 / 29 / 43
 ```
 
-This explicitly avoids choosing the best seed.
+此规则明确避免选择表现最好的 seed。
 
-## Generic protocol
+## 通用协议
 
-Primary enrollment:
+主要 enrollment：
 
 ```text
 K=1 per intent
@@ -41,7 +40,7 @@ selection = deterministic stable hash from Core30 train
 selection never examines embedding similarity or P6 scores
 ```
 
-Known development data:
+已知类开发数据：
 
 ```text
 Core30 dev (442)
@@ -50,7 +49,7 @@ Core30 dev (442)
 -> generic_dev_score_known
 ```
 
-Unknown development data:
+未知类开发数据：
 
 ```text
 Core30 open-set dev (1178)
@@ -59,9 +58,9 @@ Core30 open-set dev (1178)
 -> generic_dev_score_unknown
 ```
 
-No test row is touched.
+不读取任何 test row。
 
-## Threshold policy
+## Threshold 策略
 
 Prototype decision:
 
@@ -77,10 +76,9 @@ ACCEPT iff:
 otherwise REJECT
 ```
 
-Thresholds are selected only on `generic_dev_cal`.
+Thresholds 仅使用 `generic_dev_cal` 选择。
 
-The calibration grid is derived from calibration-score quantiles. Among
-threshold pairs satisfying all absolute Gates, choose lexicographically:
+Calibration grid 根据校准分数的 quantiles 生成。在满足所有绝对 Gate 的 threshold pairs 中，按以下优先顺序选择：
 
 ```text
 1. max Macro F1
@@ -90,10 +88,9 @@ threshold pairs satisfying all absolute Gates, choose lexicographically:
 5. min Known Reject
 ```
 
-If no threshold pair satisfies the Gates, the script writes the least-violating
-diagnostic pair but returns nonzero and P6-06 cannot freeze.
+若没有 threshold pair 满足 Gate，脚本会写出违规程度最小的诊断 pair，但会返回非零状态，且 P6-06 不得冻结。
 
-## P6-04 absolute Gate
+## P6-04 绝对 Gate
 
 ```text
 Macro F1       >= 0.80
@@ -103,17 +100,15 @@ Known Reject   <= 0.20
 Unknown Reject >= 0.85
 ```
 
-Macro F1 is the 30-class known-intent Macro F1 after rejection. A rejected
-known utterance contributes a false negative to its true class. Open-set
-false accepts are evaluated separately by Unknown Reject / FAR.
+Macro F1 是拒识后的 30 类已知意图 Macro F1。被拒绝的已知 utterance 会计为其真实类别的 false negative。Open-set false accepts 由 Unknown Reject / FAR 单独评估。
 
 ## P6-05 E0b
 
-The P5 Mean 64D head is the frozen head-variant baseline.
+P5 Mean 64D head 是冻结的 head-variant baseline。
 
-The P5 Attention 64D head is the mainline.
+P5 Attention 64D head 是主线方案。
 
-Both use the same:
+二者使用相同的：
 - WavLM-large hidden_states[15]
 - enrollment utterances
 - cal/score partitions
@@ -126,19 +121,18 @@ E0b passes when:
 Mean Macro-F1 - Attention Macro-F1 <= 0.02
 ```
 
-This is a head-variant non-degradation Gate, not a 1024D-vs-64D compression
-claim.
+这是 head-variant 非退化 Gate，不是 1024D 对比 64D 的压缩结论。
 
-## Run
+## 运行
 
-First confirm the open-set index path exists. Default:
+首先确认 open-set index 路径存在。默认路径：
 
 ```text
 artifacts/p2_07/mdsc_policy_v2/
 mdsc_core30_open_set_eval.index.jsonl
 ```
 
-If your file name differs, pass `--open-index <actual path>`.
+如果本地文件名不同，请传入 `--open-index <actual path>`。
 
 Then:
 
@@ -148,19 +142,18 @@ python scripts/prepare_p6_protocol.py
 python scripts/run_p6_dev_qualification.py --device cuda
 ```
 
-Only if the development Gate passes:
+仅在开发集 Gate 通过后运行：
 
 ```powershell
 python scripts/freeze_p6_teacher.py
 python scripts/audit_p6_dev_gate.py
 ```
 
-Expected freeze:
+预期冻结状态：
 
 ```text
 P6-06 STATUS: FROZEN / READY FOR P6-07
 generic_test accessed: NO
 ```
 
-Only after that should P6-07 code be added and generic_test opened once with
-the already-frozen Teacher and thresholds.
+之后才能添加 P6-07 代码，并使用已冻结的 Teacher 与 thresholds 一次性启用 generic_test。

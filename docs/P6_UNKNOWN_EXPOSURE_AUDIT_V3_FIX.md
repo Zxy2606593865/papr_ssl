@@ -1,39 +1,37 @@
-# P6 Unknown Exposure Audit v3 — train/dev-only task-index fix
+# P6 Unknown Exposure Audit v3 — 仅限 Train/Dev 的 Task-Index 修复
 
-The v2 audit failed because it called:
+v2 audit 因调用以下代码而失败：
 
 ```python
 load_real_task_rows(..., splits=("train", "dev", "test"))
 ```
 
-but the existing PAPR-SSL helper intentionally blocks `test` access during
-development:
+但现有 PAPR-SSL helper 会在开发阶段有意阻止访问 `test`：
 
 ```text
 ValueError: real P3 execution may load train/dev only
 ```
 
-This is a protection mechanism, not a data error.
+这是保护机制，并非数据错误。
 
-For the purpose of recovering the 30 Core30 phrase identities, `train + dev`
-is sufficient. v3 therefore changes only this call to:
+为了恢复 30 个 Core30 短语身份，`train + dev` 已足够。因此，v3 只将该调用改为：
 
 ```python
 load_real_task_rows(..., splits=("train", "dev"))
 ```
 
-The open-set task index is still read with `splits=("dev",)` only.
+Open-set task index 仍只通过 `splits=("dev",)` 读取。
 
-No generic test audio, embeddings, or labels are loaded.
+不加载任何 generic test audio、embeddings 或 labels。
 
-Run:
+运行：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates_v3.py
 python scripts/review_p6_unknown_exposure_audit_v3.py
 ```
 
-Outputs go to:
+输出写入：
 
 ```text
 artifacts/p6_unknown_exposure_audit_v3/

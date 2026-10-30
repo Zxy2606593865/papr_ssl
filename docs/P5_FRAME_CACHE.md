@@ -1,6 +1,6 @@
-# P5 prerequisite — frame-level cache for Mean vs Attention DR
+# P5 前置条件 — Mean 与 Attention DR 的帧级 Cache
 
-P4 is closed.
+P4 已完成。
 
 Frozen source:
 
@@ -11,12 +11,11 @@ outputs.hidden_states[15]
 D = 1024
 ```
 
-P4 used masked-mean `[D]` caches. P5 Attention DR needs the temporal axis,
-therefore P5 first materializes only the winner's frame-level `[T,D]` features.
+P4 使用 masked-mean `[D]` caches。P5 Attention DR 需要时序轴，因此 P5 首先只为获胜项物化帧级 `[T,D]` features。
 
-No other Backbone is reopened.
+不重新启用其他 Backbone。
 
-## Cache format
+## Cache 格式
 
 Variable-length utterances are packed into shards:
 
@@ -27,11 +26,11 @@ shard_00000.pt
   utt_ids:  N strings
 ```
 
-with `index.jsonl` mapping every utterance to its frame range.
+使用 `index.jsonl` 将每条 utterance 映射到对应帧范围。
 
-## Run
+## 运行
 
-Use local HF cache only:
+仅使用本地 HF cache：
 
 ```powershell
 $env:HF_HUB_OFFLINE="1"
@@ -42,16 +41,15 @@ python scripts/materialize_p5_wavlm15_frame_cache.py `
   --batch-size 2
 ```
 
-If CUDA memory is tight, `--batch-size 1` is allowed because it does not
-change the feature definition.
+如果 CUDA 显存紧张，可以使用 `--batch-size 1`，因为这不会改变特征定义。
 
-Then:
+随后运行：
 
 ```powershell
 python scripts/audit_p5_wavlm15_frame_cache.py
 ```
 
-PASS requires:
+通过时必须满足：
 
 ```text
 train = 3756
@@ -62,7 +60,7 @@ feature dtype = float32
 generic_test accessed = NO
 ```
 
-After the frame cache passes, P5 can compare:
+帧级 cache 通过后，P5 可以比较：
 
 ```text
 A. Mean DR
@@ -76,5 +74,4 @@ B. Attention DR
    -> L2
 ```
 
-Both branches must use the same frozen frame cache, the same train/dev split,
-the same SCAF settings, the same optimizer budget, and seeds 17/29/43.
+两个分支必须使用相同的冻结帧级 cache、相同的 train/dev split、相同的 SCAF 设置和 optimizer budget，以及 seeds 17/29/43。

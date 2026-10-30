@@ -1,6 +1,6 @@
 # P4-03 — WavLM-large Hidden-State Sweep
 
-P4-02 is closed. P4-03 changes only the Backbone to:
+P4-02 已完成。P4-03 只将 Backbone 改为：
 
 ```text
 microsoft/wavlm-large
@@ -8,9 +8,9 @@ revision c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c
 outputs.hidden_states indices 0..24
 ```
 
-Everything else remains frozen from P3/P4-01.
+其余内容均沿用 P3/P4-01 的冻结设置。
 
-## 1. WavLM safe batching
+## 1. WavLM 安全批处理
 
 P2-06C experimentally validated:
 
@@ -18,7 +18,7 @@ P2-06C experimentally validated:
 WavLM -> native right-padded batch
 ```
 
-Therefore P4-03 does **not** use Wav2Vec2's exact-length grouping.
+因此，P4-03 **不**使用 Wav2Vec2 的精确长度分组。
 
 Instead:
 
@@ -40,21 +40,19 @@ valid frame_mask
 masked mean for all 25 hidden states
 ```
 
-Length sorting is only a throughput/memory optimization. It reduces wasted
-padding without changing the model input semantics.
+长度排序只用于提升吞吐量、减少内存开销。它能减少无效 padding，但不会改变模型输入语义。
 
-Default cache batch size is 2 because WavLM-large and long MDSC utterances can
-be substantially heavier than Wav2Vec2-base on a laptop GPU.
+默认 cache batch size 为 2，因为在笔记本 GPU 上，WavLM-large 和较长的 MDSC utterances 可能比 Wav2Vec2-base 占用更多资源。
 
-If CUDA OOM occurs:
+若发生 CUDA OOM：
 
 ```powershell
 --batch-size 1
 ```
 
-This does not change the feature definition.
+这不会改变特征定义。
 
-## 2. Materialize all 25 caches
+## 2. 物化全部 25 份 caches
 
 ```powershell
 python scripts/materialize_p4_03_wavlm_all_layers.py `
@@ -62,8 +60,7 @@ python scripts/materialize_p4_03_wavlm_all_layers.py `
   --batch-size 2
 ```
 
-One WavLM forward returns all 25 hidden states. The same audio is not forwarded
-25 separate times.
+一次 WavLM forward 会返回全部 25 个 hidden states。同一段音频不会被单独 forward 25 次。
 
 Expected:
 
@@ -75,13 +72,13 @@ layer 24: COMPLETE (created)
 P4-03 WAVLM CACHE FANOUT: PASS
 ```
 
-## 3. Run 25 x 3 frozen Teacher conditions
+## 3. 运行 25 x 3 个冻结的 Teacher 条件
 
 ```powershell
 python scripts/run_p4_03_wavlm_sweep.py --device cuda
 ```
 
-This means:
+即：
 
 ```text
 25 hidden-state indices
@@ -89,7 +86,7 @@ x 3 seeds
 = 75 runs
 ```
 
-Each run remains:
+每个 run 均保持以下设置：
 
 ```text
 Core30 train/dev
@@ -104,15 +101,15 @@ generic_dev_score = prototype_macro_f1
 generic_test sealed
 ```
 
-## 4. Completion audit
+## 4. 完成审计
 
-After all 75 conditions:
+75 种条件全部完成后运行：
 
 ```powershell
 python scripts/audit_p4_03_wavlm_sweep.py
 ```
 
-PASS requires:
+通过时必须满足：
 
 ```text
 25 layers
@@ -123,6 +120,4 @@ ranking performed = NO
 best layer selected = NO
 ```
 
-P4-03 deliberately does not choose WavLM's best layer. P4-05 will compute
-three-seed mean / sample std / 95% Student-t CI, and P4-06 will select the
-per-Backbone winner.
+P4-03 有意不选择 WavLM 最佳层。P4-05 会计算 three-seed mean / sample std / 95% Student-t CI，P4-06 再为每个 Backbone 选出最佳项。

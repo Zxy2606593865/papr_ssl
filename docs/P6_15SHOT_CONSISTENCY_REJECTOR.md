@@ -1,8 +1,8 @@
 # P6 15-shot Enrollment-Consistency Rejector
 
-## Motivation
+## 动机
 
-The previous lightweight rejector used only:
+之前的轻量 rejector 只使用：
 
 ```text
 top-1 cosine
@@ -10,16 +10,13 @@ top1-top2 margin
 and simple quadratic terms
 ```
 
-It did not improve the full Gate.
+它未能改善完整 Gate 的结果。
 
-However, a 15-shot system contains much more information than one mean
-prototype. A true known query should often be consistently similar to MANY of
-the 15 enrollment utterances, while an unknown query may match the centroid or
-one enrollment sample by chance.
+然而，15-shot 系统包含的信息远多于一个 mean prototype。真正的已知 query 往往会与 15 条 enrollment utterances 中的多条持续相似；未知 query 则可能只是偶然接近 centroid 或某一条 enrollment sample。
 
-This experiment therefore uses the full enrollment similarity distribution.
+因此，本实验使用完整的 enrollment similarity 分布。
 
-## Frozen
+## 冻结设置
 
 ```text
 WavLM-large hidden_states[15]
@@ -29,10 +26,9 @@ mean-prototype intent prediction
 generic_test sealed
 ```
 
-## New rejector evidence
+## 新的 Rejector 证据
 
-For the class predicted by the unchanged mean-prototype classifier, compute
-cosine similarity to all 15 enrollment embeddings.
+对未改变的 mean-prototype classifier 预测出的类别，计算 query 与全部 15 个 enrollment embeddings 的 cosine similarity。
 
 Features include:
 
@@ -53,11 +49,9 @@ centroid minus enrollment mean
 max minus min
 ```
 
-A tiny balanced logistic regression is trained on each calibration half only.
-The probability threshold is selected on calibration only and tested on the
-held-out score half.
+仅在每个 calibration half 上训练一个小型 balanced logistic regression。Probability threshold 也只用 calibration half 选择，再在留出的 score half 上测试。
 
-## Run
+## 运行
 
 ```powershell
 python scripts/export_p6_15shot_consistency_embeddings.py --device cuda
@@ -65,12 +59,8 @@ python scripts/run_p6_15shot_consistency_rejector.py
 python scripts/audit_p6_15shot_consistency_rejector.py
 ```
 
-## Decision after this experiment
+## 本实验后的决策
 
-If this materially improves repeated-split full-Gate pass rate, keep the
-Teacher frozen and use enrollment-distribution evidence in the personalized
-decision layer.
+若本实验显著提高重复划分下完整 Gate 的通过率，则继续冻结 Teacher，并在个性化决策层使用 enrollment-distribution 证据。
 
-If it still remains near 0/20 Gate passes, decision-layer tuning is exhausted
-enough for this stage. The next justified step is open-set-aware representation
-training rather than more rejector complexity.
+若 Gate 通过率仍接近 0/20，则本阶段的决策层调优已基本穷尽。下一步应开展面向 open-set 的表征训练，而不是继续增加 rejector 复杂度。

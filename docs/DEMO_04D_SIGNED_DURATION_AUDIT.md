@@ -1,6 +1,6 @@
-# Demo-04D — Signed Duration-Direction Audit
+# Demo-04D — 时长方向符号审计
 
-## Why this step exists
+## 本步骤的目的
 
 The current frozen H6 duration feature is:
 
@@ -8,7 +8,7 @@ The current frozen H6 duration feature is:
 abs(log(T_query / median(T_support)))
 ```
 
-This has an important limitation:
+该特征有一个重要限制：
 
 ```text
 query is shorter by 28%
@@ -22,17 +22,16 @@ query is longer by 39%
 
 can produce the same absolute log-ratio magnitude.
 
-For the real hard negative:
+对于真实 hard negative：
 
 ```text
 Unknown:    大家好
 Registered: 大家好 我叫王灏
 ```
 
-the fact that the query is **shorter** may be more informative than duration
-mismatch magnitude alone.
+query **更短**这一方向信息可能比单独使用时长差异幅度更有价值。
 
-## Existing evidence already rules out a simple absolute-duration threshold
+## 现有证据已排除简单的绝对时长阈值
 
 Correct known samples include absolute duration-log-ratio values up to roughly:
 
@@ -46,17 +45,17 @@ while the `大家好` false accept is:
 0.3285
 ```
 
-Therefore a rule such as:
+因此，类似以下规则：
 
 ```text
 duration_log_ratio > 0.30 -> REJECT
 ```
 
-would also hit valid known samples.
+也会误伤有效的 known 样本。
 
 ## Demo-04D
 
-Measure, without fitting:
+只测量、不拟合：
 
 ```text
 signed_duration_log_ratio = log(T_query / median(T_support))
@@ -73,11 +72,11 @@ signed > 0
 → query longer than enrolled phrase
 ```
 
-This is a diagnostic only. It does not change H6.
+这仅用于诊断，不会改变 H6。
 
-## Run
+## 运行
 
-From the `papr_ssl` root:
+在 `papr_ssl` 根目录运行：
 
 ```powershell
 python scripts/audit_demo04d_signed_duration.py `
@@ -87,7 +86,7 @@ python scripts/audit_demo04d_signed_duration.py `
   --output-dir artifacts\demo_04d_signed_duration_audit
 ```
 
-## Output
+## 输出
 
 ```text
 artifacts/demo_04d_signed_duration_audit/
@@ -95,7 +94,7 @@ artifacts/demo_04d_signed_duration_audit/
 └── summary.json
 ```
 
-The key lines are:
+重点查看以下行：
 
 ```text
 UNKNOWN FALSE ACCEPT DIRECTION CHECK
@@ -106,9 +105,6 @@ signed_log = ?
 known correct equally/more short = ?/24
 ```
 
-If the prefix false accept is substantially shorter than every valid known query,
-then a **signed shortfall feature** becomes worth evaluating.
+如果 prefix false accept 明显短于所有有效 known query，则值得评估**带符号的时长不足特征**。
 
-If valid known queries overlap strongly in the same negative direction, duration
-direction alone is also insufficient and we should move to a richer prefix-specific
-temporal feature rather than a hand-written threshold.
+如果有效 known query 在相同负方向上有明显重叠，那么仅靠时长方向也不够；应改为探索更丰富的 prefix 专属时序特征，而非手写阈值。

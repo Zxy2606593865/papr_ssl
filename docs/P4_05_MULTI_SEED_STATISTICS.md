@@ -1,8 +1,8 @@
-# P4-05 — Three-seed Statistical Aggregation
+# P4-05 — 三个 Seed 的统计汇总
 
-P4-02, P4-03 and P4-04 have completed all frozen layer sweeps.
+P4-02、P4-03 和 P4-04 已完成所有冻结的 layer sweeps。
 
-Input coverage:
+输入覆盖范围：
 
 ```text
 Wav2Vec2-base   13 layers x 3 seeds = 39
@@ -14,15 +14,15 @@ Total:
 189 layer-seed results
 ```
 
-P4-05 performs statistics only.
+P4-05 只执行统计汇总。
 
-It does **not**:
-- rank layers,
-- select a best layer,
-- select a best Backbone,
-- access generic_test.
+本阶段**不**会：
+- 对 layer 排名；
+- 选择最佳 layer；
+- 选择最佳 Backbone；
+- 访问 generic_test。
 
-For every Backbone/Layer configuration:
+对每种 Backbone/Layer 配置：
 
 ```text
 seed17
@@ -35,25 +35,25 @@ standard error
 two-sided 95% Student-t CI (df=2)
 ```
 
-The confidence interval is:
+置信区间计算如下：
 
 ```text
 mean ± t(0.975, df=2) * s / sqrt(3)
 ```
 
-with:
+其中：
 
 ```text
 t = 4.302652729911275
 ```
 
-Run:
+运行：
 
 ```powershell
 python scripts/aggregate_p4_05_statistics.py
 ```
 
-Outputs:
+输出：
 
 ```text
 artifacts/p4_runs/p4_05_statistics/
@@ -61,13 +61,13 @@ artifacts/p4_runs/p4_05_statistics/
 └── p4_05_multiseed_statistics.csv
 ```
 
-Then audit:
+随后执行审计：
 
 ```powershell
 python scripts/audit_p4_05_statistics.py
 ```
 
-PASS requires:
+通过时必须满足：
 
 ```text
 13 Wav2Vec2 configurations
@@ -84,5 +84,4 @@ best backbone selected = NO
 generic_test accessed = NO
 ```
 
-P4-06 will be the first phase allowed to select the best layer per Backbone
-and then compare the three Backbone winners.
+P4-06 是首个允许为每种 Backbone 选择最佳层并比较三种 Backbone 获胜项的阶段。

@@ -1,4 +1,4 @@
-# P6 Gate Failure Diagnostic
+# P6 Gate 失败诊断
 
 The exact K=2 threshold audit established:
 
@@ -7,12 +7,11 @@ The exact K=2 threshold audit established:
 0 feasible pairs
 ```
 
-Therefore threshold search resolution is no longer a plausible explanation.
+因此，threshold search 分辨率不足已不太可能是失败原因。
 
-This diagnostic does not select a new threshold. It measures the Pareto limit
-of the frozen K=2 score+margin rule on `generic_dev_cal`.
+该诊断不选择新 threshold，而是衡量冻结的 K=2 score+margin 规则在 `generic_dev_cal` 上的 Pareto 极限。
 
-It reports:
+报告以下指标：
 
 1. Maximum Correct Accept achievable while Unknown Reject >= 0.85.
 2. Maximum Unknown Reject achievable while Correct Accept >= 0.80.
@@ -23,11 +22,10 @@ It reports:
    - wrongly classified known samples,
    - unknown samples.
 
-Run:
+运行：
 
 ```powershell
 python scripts/diagnose_p6_k2_exact_gate.py
 ```
 
-This is diagnostic-only. It must not be used to alter thresholds and then claim
-the same calibration set as an untouched Gate. `generic_test` remains sealed.
+本流程仅用于诊断。不得据此修改 thresholds 后，又声称同一校准集仍是未触碰的 Gate。`generic_test` 继续封存。

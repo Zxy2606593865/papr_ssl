@@ -1,4 +1,3 @@
-# Local datasets
+# 本地数据集
 
-Dataset contents are local-only and ignored by Git. Keep manifests and data
-paths project-relative; do not copy Legacy feature caches into this directory.
+数据集内容仅保存在本地，并由 Git 忽略。manifest 和数据路径请使用相对于项目的路径；不要将 Legacy feature caches 复制到此目录。

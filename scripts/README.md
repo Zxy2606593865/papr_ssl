@@ -1,4 +1,3 @@
-# Scripts
+# 脚本
 
-Executable training and evaluation CLIs will be added only when their real
-workflows are implemented. Bootstrap intentionally creates no placeholder CLI.
+只有在实际工作流实现后，才会添加可执行的训练和评估 CLI。初始化时不会创建占位 CLI。

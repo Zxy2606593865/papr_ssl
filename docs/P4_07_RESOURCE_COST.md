@@ -1,17 +1,17 @@
-# P4-07 — Model Scale / Resource Cost Recording
+# P4-07 — 模型规模与资源成本记录
 
-P4-07 does not choose the Teacher.
+P4-07 不负责选择 Teacher。
 
-The Teacher was chosen in P4-06 using:
+Teacher 已在 P4-06 按以下指标选定：
 
 ```text
 3-seed mean generic_dev_score
 = prototype_macro_f1
 ```
 
-P4-07 only records the cost of the three per-Backbone winner configurations.
+P4-07 只记录每种 Backbone 获胜配置的资源成本。
 
-## Metrics
+## 指标
 
 For each winner:
 
@@ -27,7 +27,7 @@ forward peak extra memory
 selected masked-mean cache size
 ```
 
-The latency benchmark uses:
+Latency benchmark 使用以下设置：
 
 ```text
 1.0 s waveform
@@ -59,35 +59,32 @@ waveform_to_hidden_latency_ms
 For Wav2Vec2 / WavLM, waveform-to-hidden includes waveform H2D transfer +
 model forward, but not audio file decoding.
 
-## Important interpretation
+## 重要解读
 
-The selected hidden state is read from the standard Hugging Face full forward:
+所选 hidden state 由标准 Hugging Face 完整 forward 读取：
 
 ```text
 output_hidden_states=True
 ```
 
-No early exit or encoder truncation is assumed. Therefore selecting an
-intermediate hidden_state_index does not automatically imply reduced backbone
-compute. Any future early-exit/truncation optimization would be a separate
-experiment.
+不假设有 early exit 或 encoder 截断。因此，选择中间层 `hidden_state_index` 并不自动降低 backbone 计算量。未来如进行 early-exit/truncation 优化，应单独开展实验。
 
-## Run
+## 运行
 
-P4-06 must already have produced:
+P4-06 必须已生成：
 
 ```text
 artifacts/p4_runs/p4_06_selection/p4_06_selection.json
 ```
 
-Then:
+随后运行：
 
 ```powershell
 python scripts/profile_p4_07_resource_cost.py --device cuda
 python scripts/audit_p4_07_resource_cost.py
 ```
 
-Outputs:
+输出：
 
 ```text
 artifacts/p4_runs/p4_07_resource_cost/
@@ -95,7 +92,7 @@ artifacts/p4_runs/p4_07_resource_cost/
 └── p4_07_resource_cost.csv
 ```
 
-PASS requires:
+通过时必须满足：
 - all 3 Backbone winners profiled
 - positive parameter/latency measurements
 - standard full HF forward
@@ -103,4 +100,4 @@ PASS requires:
 - resource cost did not alter P4-06 Teacher selection
 - generic_test not accessed
 
-After P4-07 PASS, P4-08 freezes the P4-06 winner as the sole P5 mainline.
+P4-07 通过后，P4-08 会冻结 P4-06 获胜项，作为 P5 唯一主线。

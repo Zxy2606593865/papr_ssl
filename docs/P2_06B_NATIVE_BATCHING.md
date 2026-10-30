@@ -1,33 +1,32 @@
-# P2-06B Native Batched Masking
+# P2-06B 原生批处理 mask
 
-## Source inspection result
+## 源码检查结果
 
-The current project wrappers already contain native padded batching for:
+当前项目 wrappers 已为以下模型实现原生 padded batching：
 
-- Wav2Vec2: `forward(waveforms, sample_mask=None)`
-- WavLM: `forward(waveforms, sample_mask=None)`
+- Wav2Vec2：`forward(waveforms, sample_mask=None)`
+- WavLM：`forward(waveforms, sample_mask=None)`
 
-Both pass `sample_mask` into the Hugging Face model as `attention_mask` and
-convert sample validity to selected-feature validity with the model helper.
+二者都会把 `sample_mask` 作为 `attention_mask` 传入 Hugging Face 模型，并使用模型 helper 将采样点有效性转换为所选特征帧的有效性。
 
-W2v-BERT 2.0 previously lacked this input-side mask contract.
+W2v-BERT 2.0 先前尚无输入侧 mask 契约。
 
-## W2v-BERT 2.0 native policy
+## W2v-BERT 2.0 原生策略
 
-Given:
+给定：
 
 ```text
 waveforms   [B,Smax]
 sample_mask [B,Smax]
 ```
 
-the wrapper derives semantic raw lengths:
+wrapper 推导语义原始长度：
 
 ```text
 Li = sum(sample_mask[i])
 ```
 
-and constructs one variable-length Python list:
+并构造一个变长 Python 列表：
 
 ```text
 [
@@ -37,46 +36,44 @@ and constructs one variable-length Python list:
 ]
 ```
 
-This list is passed to `AutoFeatureExtractor` once with `padding=True`.
-The feature extractor creates:
+该列表通过一次 `AutoFeatureExtractor` 调用传入，并设置 `padding=True`。Feature extractor 生成：
 
 ```text
 input_features [B,Tmax,F]
 attention_mask [B,Tmax]
 ```
 
-and the W2v-BERT neural model receives that entire batch in one forward call.
+之后，W2v-BERT 神经网络模型在一次 forward 调用中处理整个 batch。
 
-## Why compare with P2-06A?
+## 为什么要与 P2-06A 比较？
 
-P2-06A is the correctness reference because every source waveform is forwarded
-at exact semantic length.
+P2-06A 是正确性参考，因为它会按每条源 waveform 的精确语义长度分别执行 forward。
 
-P2-06B compares native batching against that reference at two levels:
+P2-06B 从两个层级将原生 batching 与该参考结果比较：
 
-1. Structural
-   - exact valid frame count match.
+1. 结构层面
+   - 有效帧数必须完全匹配。
 
-2. Numerical
-   - mean frame-wise cosine similarity;
-   - minimum frame-wise cosine similarity (reported);
-   - pooled-feature cosine similarity;
-   - MAE and max absolute difference (reported).
+2. 数值层面
+   - 帧级 cosine similarity 均值；
+   - 帧级 cosine similarity 最小值（报告）；
+   - pooled-feature cosine similarity；
+   - MAE 与最大绝对差（报告）。
 
-Default numerical Gate:
+默认数值 Gate：
 
 ```text
 mean frame cosine >= 0.999
 pooled cosine     >= 0.999
 ```
 
-These thresholds are intentionally diagnostic rather than assumed facts.
+这些阈值用于诊断，不应被视为预设事实。
 
-## Important interpretation
+## 结果解读要点
 
-A native batching FAIL does NOT imply that the pretrained model is broken.
+原生 batching 未通过，并不意味着预训练模型本身损坏。
 
-It means:
+这表示在设定容差下：
 
 ```text
 padded batched inference
@@ -84,13 +81,8 @@ padded batched inference
 exact-length singleton reference
 ```
 
-to the selected tolerance.
-
-This may reveal a frontend normalization/padding interaction and should lead to
-a model-specific batching policy rather than weakening the mask semantics.
+这可能揭示 frontend normalization 与 padding 之间的相互作用。应据此制定模型专属 batching 策略，而不是放宽 mask 语义。
 
 ## P2-06B Gate
 
-Run all three real candidates. Only after observing their measured
-reference-vs-native behavior should the project decide whether each backbone
-may use native padded batching for large-scale feature extraction.
+运行全部三个真实候选项。观察实测的 reference-vs-native 行为后，再决定各 backbone 是否可在大规模特征提取中采用原生 padded batching。

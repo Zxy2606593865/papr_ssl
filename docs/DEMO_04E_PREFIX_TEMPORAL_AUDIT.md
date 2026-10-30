@@ -1,6 +1,6 @@
-# Demo-04E — Prefix / Endpoint Temporal Audit
+# Demo-04E — 前缀 / 端点时序审计
 
-## What Demo-04D established
+## Demo-04D 的结论
 
 The false accept:
 
@@ -10,7 +10,7 @@ Top1:    大家好 我叫王灏
 Q/S = 0.720
 ```
 
-is shorter than the enrolled phrase.
+它比 enrollment 短语更短。
 
 But three correct Known queries are equally or even more short:
 
@@ -18,20 +18,19 @@ But three correct Known queries are equally or even more short:
 known correct equally/more short = 3/24
 ```
 
-Therefore:
+因此：
 
 ```text
 signed duration alone
 ```
 
-is not a safe decision rule.
+不是安全的决策规则。
 
-## Next hypothesis
+## 下一项假设
 
-A true prefix hard negative should have a different **temporal shape** from a
-legitimate faster/shorter pronunciation of the full phrase.
+真正的前缀 hard negative，其**时序形状**应不同于完整短语的合理快速/缩短发音。
 
-For the top-1 enrolled intent, Demo-04E measures:
+对于 top-1 enrollment 意图，Demo-04E 测量：
 
 ```text
 full_dtw_sim
@@ -50,19 +49,17 @@ Interpretation:
 prefix_minus_suffix >> 0
 ```
 
-means the query resembles the beginning of the enrolled phrase more than its
-ending.
+表示 query 与 enrollment 短语开头的相似度高于其结尾。
 
 ```text
 start_minus_end >> 0
 ```
 
-means the start endpoint is much more compatible than the end endpoint.
+表示起始端点的匹配度明显高于结束端点。
 
-The important comparison is NOT against all queries only. It explicitly prints
-the valid Known queries that are equally or more short than the hard negative.
+关键比较并非只看所有 query 的整体情况。报告会专门列出与 hard negative 同样短或更短的有效 Known query。
 
-## Why this is better than another hand-written duration threshold
+## 为什么比再加一个手写时长阈值更合适
 
 The current H6 DTW produces a high score for:
 
@@ -72,15 +69,15 @@ vs
 大家好 我叫王灏
 ```
 
-so duration alone cannot tell whether the query is:
+因此，仅凭时长无法判断 query 是：
 - a faster full utterance, or
 - only the prefix of the enrolled utterance.
 
-Endpoint/prefix diagnostics test this missing distinction.
+端点/前缀诊断用于检验这一缺失的区分能力。
 
-## Run
+## 运行
 
-From `papr_ssl` root:
+在 `papr_ssl` 根目录运行：
 
 ```powershell
 python scripts/audit_demo04e_prefix_temporal.py `
@@ -90,14 +87,10 @@ python scripts/audit_demo04e_prefix_temporal.py `
   --output-dir artifacts\demo_04e_prefix_temporal_audit
 ```
 
-No training, threshold fitting, runtime changes, or generic_test access.
+不进行训练、threshold 拟合或 runtime 修改，也不访问 `generic_test`。
 
-## Decision after this audit
+## 本次审计后的决策
 
-If the hard negative has a clear prefix/endpoint signature that the equally-short
-Known controls do not have, the next step is to prototype a **prefix-risk
-feature** in the decision layer.
+如果 hard negative 呈现明确的前缀/端点特征，而同样短的 Known 对照没有该特征，下一步就在决策层试做**前缀风险特征**。
 
-If the distributions still overlap strongly, do not add another heuristic.
-The better next step is to collect more real hard negatives and fit/evaluate a
-small open-set decision feature set on session-separated real-user data.
+如果分布仍然高度重叠，就不要再添加启发式规则。更合适的下一步是收集更多真实 hard negative，并在按 session 分离的真实用户数据上拟合和评估一组小型 open-set 决策特征。

@@ -1,12 +1,10 @@
-# P2-07A Task View / Label Inventory Audit
+# P2-07A Task View / Label Inventory 审计
 
-## Purpose
+## 目的
 
-The raw MDSC manifest contains 3,858 distinct transcript strings. P2-07A does
-not assume these are 3,858 final KWS classes.
+原始 MDSC manifest 包含 3,858 个不同的 transcript strings。P2-07A 不假设它们就是最终的 3,858 个 KWS classes。
 
-Instead, it constructs descriptive candidate inventories using only observed
-manifest metadata.
+相反，它仅使用已观测的 manifest metadata 构建描述性候选清单。
 
 ## Candidate MDSC inventories
 
@@ -19,7 +17,7 @@ manifest metadata.
 - `eval_only_relative_to_enrollment`
 - `enrollment_only_relative_to_eval`
 
-These names describe set relationships only.
+这些名称只描述集合之间的关系。
 
 For example:
 
@@ -27,28 +25,23 @@ For example:
 enrollment_and_eval_overlap
 ```
 
-means that the exact transcript appears at least once in both roles. It does
-NOT yet mean that the transcript is officially a target keyword.
+表示完全相同的 transcript 至少在两种 role 中各出现一次。它**并不**表示该 transcript 已被正式定义为 target keyword。
 
-## GSC development view
+## GSC 开发视图
 
-For PAPR-SSL representation/backbone screening, P2-07A records a simple
-project development view:
+用于 PAPR-SSL 表征/backbone 筛选时，P2-07A 记录了一个简单的项目开发视图：
 
 ```text
 gsc_all_35_closed_set
 ```
 
-using all 35 observed Speech Commands labels while preserving the official
-train/dev/test split.
+使用观测到的全部 35 个 Speech Commands labels，同时保留官方 train/dev/test split。
 
-This is a project-side evaluation view, not a claim about the only official
-Speech Commands benchmark protocol.
+这是项目侧的评估视图，并非声称 Speech Commands 只有这一种官方 benchmark protocol。
 
-## Next decision: P2-07B
+## 下一步决策：P2-07B
 
-After inspecting the real candidate inventory, P2-07B freezes the semantic task
-policy:
+检查真实候选清单后，P2-07B 会冻结语义 task policy：
 
 - which MDSC phrases are eligible personalized targets;
 - what data can act as non-target / unknown speech;
@@ -57,4 +50,4 @@ policy:
 - which view is used for backbone/layer selection versus final domain
   qualification.
 
-No SCAF training should begin before P2-07B is frozen.
+P2-07B 冻结前不得开始 SCAF training。

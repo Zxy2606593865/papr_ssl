@@ -1,6 +1,6 @@
-# H0-02 — Unseen-Speaker Personalized Episode Audit
+# H0-02 — 未见说话人个性化 episode 审计
 
-H0-01 found:
+H0-01 的结果：
 
 ```text
 train speakers = 34
@@ -8,13 +8,11 @@ dev speakers = 4
 train/dev overlap = 0
 ```
 
-That means the official split is speaker-disjoint.
+这说明官方 split 按说话人完全隔离。
 
-For ordinary "support must be in train and query must be in dev" logic this
-looks blocked. But for **few-shot personalization of a new user**, speaker
-disjointness is actually desirable.
+按照“support 必须来自 train、query 必须来自 dev”的常规逻辑，这似乎无法进行。但对于**新用户的 few-shot 个性化**，说话人隔离实际上是理想设置。
 
-The correct protocol is:
+正确的协议如下：
 
 ```text
 HEAD-FIT:
@@ -33,10 +31,9 @@ FINAL TEST:
     └─ remaining query recordings are scored
 ```
 
-This is the standard logical shape of few-shot personalization: the test user
-may supply a small labeled support set without becoming a training speaker.
+这是 few-shot 个性化的标准逻辑形式：测试用户可以提供少量带标签的 support 样本，而不会因此成为训练说话人。
 
-H0-02 therefore audits whether each speaker/phrase has at least:
+因此，H0-02 审计每个说话人/短语是否至少有：
 
 ```text
 N support recordings + 1 independent query recording
@@ -48,14 +45,12 @@ for N in:
 1 / 2 / 5 / 10 / 15
 ```
 
-Run:
+运行：
 
 ```powershell
 python scripts/audit_mdsc_unseen_speaker_episodes.py
 ```
 
-No audio, embeddings, or TEST examples are loaded.
+不会加载音频、embedding 或 TEST 样本。
 
-Because H0-01 found no explicit session/day metadata, any successful result here
-is **user-level / unseen-speaker personalization**, not cross-session
-personalization.
+由于 H0-01 未发现明确的 session/day 元数据，此处即使审计通过，也只能说明支持**用户级 / 未见说话人个性化**，不能说明支持跨 session 个性化。

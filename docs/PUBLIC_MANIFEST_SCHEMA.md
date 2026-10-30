@@ -1,19 +1,17 @@
-# PAPR-SSL Public Audio Manifest Schema v1
+# PAPR-SSL 公共音频 Manifest Schema v1
 
 **Phase:** P2-03
 **Schema ID:** `papr_ssl.audio_manifest.v1`
 
-## 1. Purpose
+## 1. 用途
 
-The manifest is the stable interface between dataset-specific raw layouts and
-downstream PAPR-SSL code.
+manifest 是数据集专属原始目录结构与下游 PAPR-SSL 代码之间的稳定接口。
 
-Raw audio is not copied into the manifest. Each JSONL row records where one
-source audio item lives and the metadata required to use it reproducibly.
+manifest 不复制原始音频。每行 JSONL 记录一条源音频的位置，以及可复现使用所需的元数据。
 
-The schema is intentionally independent of GSC/MDSC directory layout.
+此 schema 刻意与 GSC/MDSC 目录结构解耦。
 
-## 2. Storage format
+## 2. 存储格式
 
 The canonical storage format is **JSON Lines (`.jsonl`)**:
 
@@ -22,36 +20,35 @@ The canonical storage format is **JSON Lines (`.jsonl`)**:
 {"utt_id":"...","dataset":"mdsc","audio_relpath":"Uncontrol/dev/eval/wav/...",...}
 ```
 
-One line = one audio record.
+一行对应一条音频记录。
 
-Paths MUST be relative to the configured dataset root. Absolute Windows paths
-must not be serialized into portable manifests.
+路径必须相对于配置的数据集根目录。不得将 Windows 绝对路径序列化到可移植的 manifest 中。
 
-## 3. Common fields
+## 3. 通用字段
 
 | Field | Type | Required | Meaning |
 |---|---|---:|---|
 | `schema_version` | string | yes | `papr_ssl.audio_manifest.v1` |
-| `utt_id` | string | yes | Globally stable utterance/record ID |
+| `utt_id` | string | yes | 全局稳定的 utterance/record ID |
 | `dataset` | enum | yes | `gsc_v2` or `mdsc` |
-| `audio_relpath` | string | yes | Dataset-root-relative audio path |
-| `speaker_id` | string/null | speech: yes | Source speaker identifier |
-| `label` | string/null | conditional | Source class/phrase label |
-| `transcript` | string/null | conditional | Source transcript text |
+| `audio_relpath` | string | yes | 相对于数据集根目录的音频路径 |
+| `speaker_id` | string/null | speech: yes | 源说话人标识符 |
+| `label` | string/null | conditional | 源类别/短语标签 |
+| `transcript` | string/null | conditional | 源转写文本 |
 | `language` | enum | yes | `en` or `zh-CN` |
 | `split` | enum | yes | `train`, `dev`, `test` |
 | `domain` | enum | yes | `standard`, `control`, `dysarthria` |
-| `role` | enum | yes | `train`, `enrollment`, `eval`, `none` |
-| `record_type` | enum | yes | `speech` or `noise` |
-| `sample_rate_hz` | int | yes | Raw file sample rate |
-| `num_channels` | int | yes | Raw channel count |
-| `num_frames` | int | yes | Raw frame count |
-| `duration_sec` | float | yes | Raw duration in seconds |
-| `source_meta` | object | yes | Dataset-specific metadata not promoted to the common schema |
+| `role` | enum | yes | `train`、`enrollment`、`eval`、`none` |
+| `record_type` | enum | yes | `speech` 或 `noise` |
+| `sample_rate_hz` | int | yes | 原始文件采样率 |
+| `num_channels` | int | yes | 原始声道数 |
+| `num_frames` | int | yes | 原始帧数 |
+| `duration_sec` | float | yes | 原始时长（秒） |
+| `source_meta` | object | yes | 尚未纳入通用 schema 的数据集专属元数据 |
 
-For a speech record, at least one of `label` and `transcript` must be present.
+对于 speech 记录，`label` 和 `transcript` 至少要提供一个。
 
-## 4. GSC mapping
+## 4. GSC 映射
 
 GSC uses:
 
@@ -67,14 +64,11 @@ role         = train
 record_type  = speech
 ```
 
-Why is `role=train` used even for GSC validation/test?
+为什么 GSC validation/test 也使用 `role=train`？
 
-`split` is the dataset partition. `role` is reserved for personalized
-enrollment/evaluation semantics. GSC has no enrollment/eval hierarchy, so its
-ordinary speech items use the neutral training-role value in schema v1.
+`split` 表示数据集分区。`role` 专用于个性化 enrollment/evaluation 语义。GSC 没有 enrollment/eval 层级，因此在 schema v1 中，普通语音样本使用中性的训练角色值。
 
-The six `_background_noise_` WAV files are not ordinary KWS utterances. If
-serialized, they use:
+六个 `_background_noise_` WAV 文件不是普通 KWS utterance。若将其序列化，应使用：
 
 ```text
 record_type = noise
@@ -83,9 +77,9 @@ speaker_id  = null
 label       = null
 ```
 
-They must not be counted as one of the 35 speech classes.
+不得将它们计入 35 个语音类别。
 
-## 5. MDSC mapping
+## 5. MDSC 映射
 
 MDSC uses:
 
@@ -108,43 +102,38 @@ Control   -> domain=control
 Uncontrol -> domain=dysarthria
 ```
 
-The official enrollment/eval hierarchy must be preserved rather than
-flattened.
+必须保留官方 enrollment/eval 层级，不得将其扁平化。
 
-The 14 stereo files discovered in P2-02 remain represented with
-`num_channels=2` in the raw manifest. Mono conversion belongs to a later
-preprocessing stage and must not rewrite raw source facts.
+P2-02 中发现的 14 个 stereo 文件，在 raw manifest 中仍以 `num_channels=2` 表示。Mono 转换属于后续 preprocessing 阶段，不得改写原始来源信息。
 
-## 6. `label` vs `transcript`
+## 6. `label` 与 `transcript`
 
-These fields are deliberately separate.
+这两个字段有意分开。
 
-`label` is the task/source class identity used for grouping or classification.
+`label` 是用于分组或分类的任务/源类别标识。
 
-`transcript` is the textual content supplied by the dataset.
+`transcript` 是数据集提供的文本内容。
 
-For GSC they are normally identical:
+对于 GSC，两者通常相同：
 
 ```text
 label      = "backward"
 transcript = "backward"
 ```
 
-For MDSC they may also initially match, but the distinction is preserved so a
-later benchmark can map multiple surface transcripts to one canonical intent
-without destroying the original source text.
+对于 MDSC，两者起初也可能相同；保留这一区分后，后续基准可以将多个表层转写映射到一个规范意图，同时不破坏原始文本。
 
-## 7. `split` vs `role`
+## 7. `split` 与 `role`
 
-They answer different questions.
+两者回答不同的问题。
 
 ```text
 split:
-Which official dataset partition owns this item?
+此条目属于哪个官方数据集分区？
 train / dev / test
 
 role:
-What is this item used for inside a personalized protocol?
+在个性化协议中，此条目用于什么用途？
 train / enrollment / eval / none
 ```
 
@@ -156,11 +145,11 @@ split  = dev
 role   = enrollment
 ```
 
-This distinction is required to preserve the original MDSC benchmark layout.
+必须保留这一区分，才能保留 MDSC 原始基准布局。
 
-## 8. Raw facts vs derived preprocessing
+## 8. 原始信息与派生预处理
 
-The v1 manifest stores RAW source facts:
+v1 manifest 存储原始来源信息：
 
 ```text
 sample_rate_hz
@@ -169,7 +158,7 @@ num_frames
 duration_sec
 ```
 
-It does not claim that the model consumes the raw file unchanged.
+它不表示模型会未经处理直接读取原始文件。
 
 Later preprocessing may perform:
 
@@ -180,10 +169,9 @@ window/crop/pad
 normalization
 ```
 
-Those operations require a separate processed-sample contract and must not
-overwrite the raw manifest fields.
+这些操作需要独立的 processed-sample contract，且不得覆盖 raw manifest 字段。
 
-## 9. Stable path policy
+## 9. 稳定路径策略
 
 Do not store:
 
@@ -197,20 +185,19 @@ Store:
 yes/xxx.wav
 ```
 
-The runtime resolves:
+runtime 会解析：
 
 ```text
 dataset_root + audio_relpath
 ```
 
-This keeps manifests portable across Windows workstations, AutoDL, Linux
-servers, and future training environments.
+这样可以让 manifest 在 Windows 工作站、AutoDL、Linux server 和未来训练环境之间保持可移植。
 
-## 10. P2-03 freeze decision
+## 10. P2-03 冻结决定
 
-P2-03 freezes the common schema only.
+P2-03 仅冻结通用 schema。
 
-P2-04 will implement:
+P2-04 将实现：
 
 ```text
 GSCAdapter
@@ -221,5 +208,4 @@ AudioManifestRecord
 *.jsonl
 ```
 
-No model training, competition-specific optimization, new split creation, or
-audio rewriting belongs to P2-03.
+P2-03 不涉及模型训练、竞赛专属优化、新建 split 或改写音频。

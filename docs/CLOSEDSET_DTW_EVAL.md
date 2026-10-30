@@ -1,12 +1,12 @@
-# Closed-set evaluation for current DTW system
+# 当前 DTW 系统的闭集评估
 
-This is a diagnostic requested after DTW improved the personalized open-set system.
+DTW 提升个性化 open-set 系统后，需要进行此诊断。
 
-The goal is to answer:
+本评估旨在回答：
 
 > If we remove Unknown/Reject entirely and only ask the system to classify one of the 30 known Core30 phrases, does DTW still help?
 
-## Protocol
+## 协议
 
 ```text
 MDSC Core30 DEV only
@@ -19,7 +19,7 @@ no score threshold
 no ACCEPT/REJECT
 ```
 
-For each of 20 repeated known-only splits:
+对 20 个重复的仅含已知类 split，分别执行：
 
 ```text
 calibration half
@@ -29,18 +29,18 @@ held-out score half
 -> evaluate 30-way closed-set Macro-F1 + Accuracy
 ```
 
-This preserves the existing development protocol and avoids selecting lambda on the same examples used for reporting.
+这既遵循现有开发协议，也避免在同一批样本上选择 lambda 并汇报结果。
 
-## Run
+## 运行
 
 ```powershell
 python scripts/run_closedset_dtw_eval.py
 python scripts/audit_closedset_dtw_eval.py
 ```
 
-## Interpretation
+## 结果解读
 
-This result is different from the earlier ~91.27% Teacher closed-set result.
+此结果与此前约 91.27% 的 Teacher 闭集结果含义不同。
 
 The earlier result measures:
 ```text
@@ -56,6 +56,6 @@ This new result measures:
 -> held-out Core30 DEV
 ```
 
-So use this experiment to quantify the value of DTW in the personalized closed-set setting, not to replace the original Teacher closed-set benchmark.
+因此，本实验用于量化 DTW 在个性化闭集场景中的价值，不应替代原始 Teacher 闭集基准。
 
-generic_test remains sealed.
+`generic_test` 继续保持封存。

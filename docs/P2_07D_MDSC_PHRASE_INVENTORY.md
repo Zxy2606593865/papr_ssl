@@ -1,20 +1,19 @@
-# P2-07D — MDSC Phrase Inventory Audit
+# P2-07D — MDSC 短语清单审计
 
-Purpose: determine how many MDSC phrases have enough speaker/domain support for
-phrase-level embedding experiments beyond the 10-wake-word auxiliary benchmark.
+目的：统计有足够 speaker/domain 支持的 MDSC 短语数量，以便开展 10-wake-word 辅助基准之外的短语级 embedding 实验。
 
-This stage is descriptive only. It does not rewrite the manifest, merge semantic
-synonyms, declare 3858 classes, or freeze a 30/50/100-class task.
+本阶段只做描述性统计：不改写 manifest、不合并语义同义词、不声明 3858 个类别，也不冻结 30/50/100 类 task。
 
-Candidate support is measured from train split only:
-- Control/train speaker coverage
-- Dysarthria/train speaker coverage
+候选短语支持度仅依据 train split 统计：
 
-Dev/test counts are reported only descriptively until the phrase set is frozen.
+- Control/train speaker 覆盖数
+- Dysarthria/train speaker 覆盖数
 
-Outputs:
+在短语集合冻结之前，dev/test 计数只作描述性报告。
+
+输出：
+
 - mdsc_phrase_inventory.csv
 - mdsc_phrase_inventory_summary.json
 
-The threshold sweep is used to see whether a natural 30/50/100/200-class
-operating point exists.
+Threshold sweep 用于观察是否存在自然形成的 30/50/100/200 类 operating point。

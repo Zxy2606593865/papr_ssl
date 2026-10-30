@@ -1,10 +1,8 @@
-# SSL Backbone Refactor Report
+# SSL Backbone 重构报告
 
-## 1. Baseline before change
+## 1. 变更前基线
 
-The existing Bootstrap implementation contained Wav2Vec2, Mean DR, SCAF,
-TeacherEncoder, Teacher/Window contracts, and offline tests. Before any source
-change:
+现有 Bootstrap 实现包含 Wav2Vec2、Mean DR、SCAF、TeacherEncoder、Teacher/Window 契约和离线测试。任何源码变更前的状态如下：
 
 ```text
 python -m compileall src tests: PASS
@@ -14,7 +12,7 @@ offline unittest discovery: 10/10 PASS
 The project was already an empty-history Git repository: no files were tracked
 or committed, and all project content appeared as untracked top-level paths.
 
-## 2. New three-backbone architecture
+## 2. 新的三 backbone 架构
 
 ```text
 same float32 waveform [B,16000]
@@ -34,10 +32,9 @@ same float32 waveform [B,16000]
             shared SCAF
 ```
 
-The comparison boundary is common; internal frontends remain model-specific.
-No training loop, evaluation implementation, or numerical result was created.
+对比边界统一，内部 frontend 保持各模型专属。本次未创建训练循环、评估实现或数值结果。
 
-## 3. Common contract
+## 3. 通用契约
 
 `SSLBackboneOutput` is defined in
 `src/papr_ssl/models/teacher/backbones/base.py` with:
@@ -52,7 +49,7 @@ It does not require equal `T`, `D`, or frontend across backbones. A read-only
 `mask` property preserves the Bootstrap output-access pattern while the common
 name is now `frame_mask`.
 
-## 4. Wav2Vec2 adaptation
+## 4. Wav2Vec2 适配
 
 The Wav2Vec2 wrapper retains `model_name`, `revision`, `hidden_layer`,
 `freeze_backbone`, dependency injection, raw `input_values`, frozen eval
@@ -60,14 +57,14 @@ behavior, and runtime range validation. Its former output dataclass name remains
 an alias to the common contract. Pooling, Mean DR, SCAF, classification, and KD
 remain outside the wrapper.
 
-## 5. WavLM implementation
+## 5. WavLM 实现
 
 `WavLMBackbone` is a separate raw-waveform wrapper with the same external
 constructor controls and common output. A real model loads through
 `WavLMModel.from_pretrained`; injected fake models keep all unit tests offline.
-No claim is made that WavLM is better than Wav2Vec2.
+本报告不主张 WavLM 优于 Wav2Vec2。
 
-## 6. W2v-BERT 2.0 implementation
+## 6. W2v-BERT 2.0 实现
 
 `W2vBert2Backbone` supports paired injection of `model` and
 `feature_extractor`. When neither is injected, the real integration path uses
@@ -79,7 +76,7 @@ The feature extractor receives each 16 kHz waveform and must return
 `input_features [B,T,F]` and `attention_mask [B,T]`. Both are validated and sent
 to the model. The selected hidden state and mask must have the same frame axis.
 
-## 7. W2v-BERT 2.0 frontend difference
+## 7. W2v-BERT 2.0 的 frontend 差异
 
 Wav2Vec2 and WavLM receive raw waveform through `input_values`; their internal
 convolutional frontend produces model frames. W2v-BERT 2.0 instead receives
@@ -87,7 +84,7 @@ feature-extractor acoustic `input_features`. This difference is preserved rather
 than hidden behind a fabricated shared frontend. Fairness begins at the common
 waveform and resumes at `SSLBackboneOutput`.
 
-## 8. Hidden-layer indexing semantics
+## 8. Hidden-layer 索引语义
 
 Across all three backbones, `hidden_layer` is the **exact zero-based index into
 `outputs.hidden_states`**. There is no implicit `+1`/`-1`, encoder-layer alias,
@@ -120,7 +117,7 @@ it does not import/load a checkpoint, train, or access data. Duplicate
 backbones. T-Integration must validate each candidate against the real model;
 the expander intentionally cannot declare a layer valid.
 
-## 11. Evaluation protocol
+## 11. 评估协议
 
 `docs/EVALUATION_PROTOCOL.md` freezes the responsibilities of
 `generic_train`, `generic_enrollment`, `generic_dev_cal`, and
@@ -135,13 +132,13 @@ Known Macro F1, correct accept, wrong intent, known reject, unknown reject, FAR,
 FRR, ACC/DET at 1% and 5% FAR, AUC, embedding diagnostics, and margins. No fake
 metric values were produced.
 
-## 12. Regression tests
+## 12. 回归测试
 
 The original 10 Bootstrap test methods still pass. Wav2Vec2 dependency
 injection, range failure, Teacher composition, contracts, Window protocol,
 Mean DR, and SCAF behavior remain covered.
 
-## 13. New tests
+## 13. 新增测试
 
 Twelve test methods were added, bringing the suite to **22/22 PASS**:
 
@@ -166,7 +163,7 @@ forbidden implementation-file scan: no matches
 checkpoint/model artifact scan: no matches
 ```
 
-## 14. Network/download status
+## 14. 网络/下载状态
 
 Network access was used only to read current official Hugging Face documentation
 for WavLM and Wav2Vec2-BERT APIs. No model, processor, feature extractor,
@@ -178,7 +175,7 @@ availability observation, not a real-forward validation. Its existing
 SciPy/NumPy compatibility warning remains unrelated and was not repaired by
 changing dependencies.
 
-## 15. Explicitly NOT implemented
+## 15. 明确尚未实现的内容
 
 - Attention DR or Layer Fusion
 - Knowledge Distillation
@@ -193,7 +190,7 @@ changing dependencies.
 
 Mean DR and SCAF remain single shared implementations.
 
-## 16. Risks
+## 16. 风险
 
 1. All three `revision: main` values are **UNPINNED DEVELOPMENT REVISION** and
    must become immutable after successful real smoke tests.
@@ -209,7 +206,7 @@ Mean DR and SCAF remain single shared implementations.
 6. Layer candidates are not valid merely because they expand successfully.
 7. No evaluation implementation exists; the protocol is a contract only.
 
-## 17. Git status
+## 17. Git 状态
 
 The repository still has no initial commit, so ordinary `git diff` and
 `git diff --stat` are empty and cannot represent untracked source changes.
@@ -234,7 +231,7 @@ untracked `docs/论文/` reference corpus was observed and left untouched; it is
 not attributed to this refactor. Local `.learnings/` and Python caches remain
 ignored. No add, commit, push, rebase, or Legacy-project Git command ran.
 
-## 18. Recommended next phase
+## 18. 建议的下一阶段
 
 Proceed to **T-Integration**, not Attention DR:
 

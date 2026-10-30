@@ -1,4 +1,4 @@
-# P6 15-shot repeated-split stability diagnostic
+# P6 15-shot 重复划分稳定性诊断
 
 The single 15-shot development split produced:
 
@@ -10,13 +10,11 @@ Known Reject   0.2443
 Unknown Reject 0.8727
 ```
 
-The calibration half contained thousands of feasible threshold pairs, but the
-held-out dev-score half failed mainly on Correct Accept / Known Reject.
+Calibration half 包含数千个可行 threshold pairs，但留出的 dev-score half 主要未通过 Correct Accept / Known Reject 指标。
 
-This bundle tests whether that failure is stable across repeated development
-partitions.
+本方案用于检查该失败情况在重复开发集划分中是否稳定。
 
-## What this experiment is
+## 本实验的内容
 
 - 15-shot mean prototype is frozen.
 - Teacher checkpoint is frozen.
@@ -26,22 +24,21 @@ partitions.
 - Those thresholds are then evaluated on the other half.
 - Default = 20 repeated splits.
 
-## What this experiment is NOT
+## 本实验不是什么
 
-It is not a new final Gate.
+它不是新的最终 Gate。
 
-The DEV pool has already been observed in prior P6 work. Therefore this is a
-development-stability diagnostic only. Public `generic_test` remains sealed.
+此前的 P6 工作已查看过 DEV pool。因此本实验仅用于诊断开发集稳定性。公开 `generic_test` 继续封存。
 
-## Run
+## 运行
 
-First export one reusable all-DEV score file:
+先导出一份可复用的全 DEV score file：
 
 ```powershell
 python scripts/export_p6_15shot_all_dev_scores.py --device cuda
 ```
 
-Then:
+随后运行：
 
 ```powershell
 python scripts/run_p6_15shot_split_stability.py
@@ -53,7 +50,7 @@ Then:
 python scripts/audit_p6_15shot_split_stability.py
 ```
 
-Key outputs:
+主要输出：
 
 ```text
 calibration feasible rate
@@ -67,9 +64,7 @@ Unknown Reject mean/std/p10/median/p90
 per-component Gate pass rates
 ```
 
-Interpretation:
+结果解读：
 
-- If Correct Accept is below 0.80 on most splits while Unknown Reject often
-  passes 0.85, the current embedding/prototype geometry is the limiting factor.
-- If full-Gate pass/fail swings widely across splits, calibration/sample-size
-  instability is important and should be addressed before retraining.
+- 如果大多数划分的 Correct Accept 低于 0.80，而 Unknown Reject 经常高于 0.85，则当前 embedding/prototype 几何结构是主要限制因素。
+- 如果完整 Gate 的通过与否随划分大幅波动，则 calibration/sample-size instability 影响较大，应在重新训练前先解决。

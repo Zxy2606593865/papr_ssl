@@ -69,6 +69,17 @@ class VoiceBridgeV5ContractTests(unittest.TestCase):
         self.assertIn("接口往返", self.js)
         self.assertNotIn("前端等待", self.js)
 
+    def test_continuous_presentation_keeps_visuals_in_step_with_process(self):
+        self.assertIn(
+            "presentUntilOutcome(token,started,()=>outcome,CONTINUOUS_EXPLANATIONS,"
+            "'长语音流程讲解','长语音识别请求进行中',renderVisuals)",
+            self.js,
+        )
+        self.assertIn(
+            "setClosure(1,'active','连续识别');setProgress(0);renderVisuals(0)",
+            self.js,
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

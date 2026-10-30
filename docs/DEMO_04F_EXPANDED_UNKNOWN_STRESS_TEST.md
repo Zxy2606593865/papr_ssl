@@ -1,6 +1,6 @@
-# Demo-04F — Expanded Wanghao Unknown Stress Test
+# Demo-04F — Wanghao 扩展未知样本压力测试
 
-## Why this is the next step
+## 为什么接下来做这项测试
 
 Demo-04E did **not** produce a robust prefix feature:
 
@@ -10,24 +10,21 @@ prefix-suffix DTW = -0.0019
 start-end cosine  = -0.1033
 ```
 
-Both values overlap the broader Known / Unknown distributions.
+这两个数值都与更广泛的 Known / Unknown 分布重叠。
 
-The one interesting observation is that, among the five equally-or-more-short
-Known controls printed by Demo-04E, the hard negative has a more negative
-`start-end` value. But there is only:
+一个值得关注的现象是，在 Demo-04E 打印的五个同等或更短的 Known 对照样本中，hard negative 的 `start-end` 值更负。但目前只有：
 
 ```text
 1 hard-negative sample
 ```
 
-That is not enough to create a production rule.
+这不足以制定生产规则。
 
-Before changing H6, use the data that already exists.
+修改 H6 前，先利用现有数据。
 
-## Existing confirmed unregistered Wanghao intents
+## 已确认但未注册的 Wanghao 意图
 
-The toolkit contains human-confirmed intents that are NOT among the five
-registered Demo intents, including:
+toolkit 中包含人工确认、但不属于五个已注册 Demo 意图的类别，包括：
 
 ```text
 greet
@@ -39,24 +36,21 @@ michael_jordan
 teacher
 ```
 
-Demo-04F evaluates **all available confirmed samples** from every such
-unregistered intent against the exact frozen Wanghao-v2 memory.
+Demo-04F 使用完全冻结的 Wanghao-v2 memory，评估每种此类未注册意图的**所有可用已确认样本**。
 
-The main question is:
+核心问题是：
 
 ```text
 Does "大家好" -> Self-introduction false accept repeat across all greet samples?
 ```
 
-If it repeats systematically, we have evidence for a real semantic-prefix
-failure mode.
+如果该现象系统性重复，就能说明存在真实的语义前缀失效模式。
 
-If only one sample fails and the other greet samples reject correctly, avoid
-designing a special rule around one observation.
+如果只有一个样本失败，而其他 greet 样本均被正确拒识，就不要围绕单个现象设计特殊规则。
 
-## Run
+## 运行
 
-From `papr_ssl` root:
+在 `papr_ssl` 根目录运行：
 
 ```powershell
 python scripts/run_demo04f_expanded_unknown.py `
@@ -66,7 +60,7 @@ python scripts/run_demo04f_expanded_unknown.py `
   --output-dir artifacts\demo_04f_unknown_expansion
 ```
 
-## Outputs
+## 输出
 
 ```text
 artifacts/demo_04f_unknown_expansion/
@@ -75,12 +69,12 @@ artifacts/demo_04f_unknown_expansion/
 └── result.json
 ```
 
-## Interpretation
+## 结果解读
 
-This is still an engineering stress-test, not an independent benchmark:
-- one real user;
-- human-confirmed intents;
-- several unregistered intents have only one source recording;
-- no session-separated collection protocol.
+这仍是工程压力测试，而非独立基准：
+- 只有一位真实用户；
+- 意图由人工确认；
+- 若干未注册意图只有一条源录音；
+- 未采用按 session 分离的采集协议。
 
-No threshold or policy is changed in this step.
+本步骤不会更改任何 threshold 或策略。

@@ -1,6 +1,6 @@
-# P3 Real Multi-seed Completion
+# P3 真实数据 Multi-seed 实验完成情况
 
-Seed 17 has already completed on the frozen real condition:
+Seed 17 已在冻结的真实实验条件下完成：
 
 ```text
 MDSC-Core30
@@ -13,11 +13,9 @@ SCAF K=3, m=0.2, s=30
 8-way x 4-shot
 ```
 
-Do not change the budget after seeing seed 17.
+查看 seed 17 的结果后，不得改变训练预算。
 
-The selected epoch for seed 17 is epoch 20. This is useful evidence that the
-current budget may not have reached a plateau, but changing the epoch budget
-for seeds 29/43 would invalidate the frozen multi-seed comparison.
+Seed 17 选择的 epoch 是 20。这提示当前预算可能尚未达到平台期，但若改变 seeds 29/43 的 epoch 预算，就会使冻结的 multi-seed 比较失效。
 
 Run:
 
@@ -26,14 +24,14 @@ python scripts/run_p3_core30_wav2vec2_seed.py --seed 29 --device cuda
 python scripts/run_p3_core30_wav2vec2_seed.py --seed 43 --device cuda
 ```
 
-Each seed gets:
+每个 seed 对应一个目录：
 
 ```text
 seed_0029/
 seed_0043/
 ```
 
-with its own:
+并分别包含：
 
 ```text
 untrained_projection_baseline.json
@@ -45,25 +43,21 @@ baseline_vs_trained.json
 run_manifest.json
 ```
 
-The same previously materialized Wav2Vec2 cache is reused.
+复用此前物化的同一份 Wav2Vec2 cache。
 
-After both complete:
+两者均完成后运行：
 
 ```powershell
 python scripts/summarize_p3_core30_wav2vec2_multiseed.py
 ```
 
-This creates:
+该命令会生成：
 
 ```text
 scientific_gate_summary.json
 experiment_manifest.json
 ```
 
-and reports baseline, selected trained score, and absolute gain as mean ± sample
-standard deviation over seeds 17/29/43.
+并报告 seeds 17/29/43 上 baseline、选中训练分数和绝对增益的均值 ± 样本标准差。
 
-If all three selected checkpoints land at or near epoch 20 and the dev curves
-are still rising, finish this frozen 20-epoch experiment first. Any longer
-training budget should then be declared as a separate experiment, not silently
-substituted into the existing three-seed result.
+如果三个被选 checkpoint 都落在 epoch 20 或附近，且 dev 曲线仍在上升，应先完成本次冻结的 20-epoch 实验。之后若要延长训练预算，必须作为独立实验声明，不得静默替换现有三 seed 结果。

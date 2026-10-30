@@ -1,8 +1,8 @@
-# P2-10 — Final Data Protocol Export
+# P2-10 — 最终数据协议导出
 
-P2-10 is the archival/finalization stage of P2. It does not rescan raw audio, rebuild manifests, redefine classes, change splits, or perform semantic merging.
+P2-10 是 P2 阶段的归档与定稿环节。它不会重新扫描原始音频、重建 manifests、重新定义类别、改变数据划分或执行语义合并。
 
-It packages the already-frozen P2 outputs into:
+该阶段将已冻结的 P2 输出打包到：
 
 ```text
 docs/DATA_PROTOCOL.md
@@ -17,11 +17,11 @@ artifacts/data_audit/
 └── manifest.json
 ```
 
-Run after the full test suite is green:
+完整测试套件通过后运行：
 
 ```powershell
 python scripts/export_p2_final_data_protocol.py `
   --unit-tests-passed 73
 ```
 
-If the raw-audit source paths differ locally, pass `--gsc-raw-audit` and `--mdsc-raw-audit` explicitly.
+如果本地 raw-audit 源路径不同，请显式传入 `--gsc-raw-audit` 和 `--mdsc-raw-audit`。

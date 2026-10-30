@@ -1,8 +1,8 @@
-# Attentive Statistics Pooling Ablation
+# Attentive Statistics Pooling 消融实验
 
-## Goal
+## 目标
 
-The current Project-1 Teacher is:
+当前 Project-1 Teacher 结构如下：
 
 ```text
 WavLM-large
@@ -12,10 +12,9 @@ WavLM-large
 -> SCAF
 ```
 
-The multi-layer fusion experiment did not improve the model, so that branch is
-closed.
+多层融合实验未能提升模型效果，因此该分支已关闭。
 
-This experiment asks a new question:
+本实验探讨一个新问题：
 
 > Does retaining temporal dispersion information improve the 256D Teacher?
 
@@ -77,18 +76,15 @@ sigma = sqrt(sum_t alpha_t h_t^2 - mu^2)
 z = L2Norm(Linear([mu, sigma]))
 ```
 
-The only conceptual difference is whether temporal standard deviation is
-retained.
+两者在概念上的唯一区别是是否保留时间标准差。
 
 ## Attention architecture control
 
-The scripts inspect the current `build_dr("attention")` implementation and infer
-the hidden size of its additive attention scorer. The matched control and ASP
-candidate both use that same hidden size.
+脚本会检查当前 `build_dr("attention")` 实现，并推断其 additive attention scorer 的 hidden size。匹配对照组和 ASP 候选组都使用相同的 hidden size。
 
-This avoids silently changing the attention capacity.
+这样可以避免在不知情的情况下改变 attention 容量。
 
-## Frozen settings
+## 已冻结的设置
 
 ```text
 Backbone: WavLM-large
@@ -107,9 +103,9 @@ Selection: dev prototype Macro-F1
 generic_test: sealed
 ```
 
-## Run order
+## 运行顺序
 
-### 1. Pre-flight audit
+### 1. 运行前审计
 
 ```powershell
 python scripts/audit_attentive_stats_setup.py
@@ -123,38 +119,35 @@ python scripts/run_attentive_stats_ablation.py `
   --output-dir artifacts/p6_attentive_stats_ablation_smoke
 ```
 
-### 3. Full experiment
+### 3. 完整实验
 
 ```powershell
 python scripts/run_attentive_stats_ablation.py
 ```
 
-### 4. Summarize
+### 4. 汇总
 
 ```powershell
 python scripts/summarize_attentive_stats_ablation.py
 ```
 
-### 5. Audit
+### 5. 审计
 
 ```powershell
 python scripts/audit_attentive_stats_ablation.py
 ```
 
-## Decision
+## 决策规则
 
-Do not promote ASP based on one seed.
+不得仅凭一个 seed 将 ASP 纳入主线。
 
-First require:
-- the matched attentive-mean control reproduces the prior 256D level within the
-  predefined 0.02 absolute tolerance;
-- ASP has a better three-seed mean;
-- ASP does not show pathological instability.
+首先要求：
+- 匹配的 attentive-mean 对照组在预设的 0.02 绝对容差内复现此前的 256D 水平；
+- ASP 的三 seed 均值更高；
+- ASP 未出现异常不稳定。
 
-If those conditions are met, run the same 15-shot personalized/open-set
-evaluation used for the current 256D Teacher.
+满足这些条件后，使用当前 256D Teacher 的相同评估流程，运行 15-shot 个性化 / open-set 评估。
 
-If ASP shows no gain, close the pooling-variant branch and move to the next
-substantive optimization: temporal latent sequence + DTW.
+如果 ASP 没有带来收益，则关闭 pooling 变体分支，转向下一项实质性优化：temporal latent sequence + DTW。
 
-The canonical 64D Teacher remains untouched for the hardware project.
+面向硬件项目的 canonical 64D Teacher 保持不变。

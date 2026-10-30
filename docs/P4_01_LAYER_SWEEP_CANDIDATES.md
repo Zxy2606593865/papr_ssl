@@ -1,6 +1,6 @@
-# P4-01 — Backbone / Hidden-State Sweep Candidate Freeze
+# P4-01 — 冻结 Backbone / Hidden-State Sweep 候选项
 
-## 1. Purpose
+## 1. 目的
 
 P4 changes only:
 
@@ -26,7 +26,7 @@ checkpoint selection by generic_dev_score only
 generic_test sealed
 ```
 
-## 2. Exact index semantics
+## 2. 精确索引语义
 
 The P4 unit is always:
 
@@ -34,15 +34,13 @@ The P4 unit is always:
 outputs.hidden_states[i]
 ```
 
-where `i` is the exact Hugging Face tuple index observed and validated in P1.
+其中 `i` 是 P1 中观测并验证过的 Hugging Face tuple 精确索引。
 
-P4 does **not** translate a paper phrase such as `Layer 16` into
-`hidden_states[16]` by assumption.
+P4 **不会**自行假设论文中的 `Layer 16` 等说法对应 `hidden_states[16]`。
 
-If a paper-layer comparison is needed later, a separate architecture-specific
-mapping must first be verified from the implementation.
+如果后续需要按论文层号进行比较，必须先根据具体实现单独验证映射关系。
 
-## 3. Frozen candidates
+## 3. 冻结的候选项
 
 P1 validated:
 
@@ -60,8 +58,7 @@ hidden_states count = 25
 valid indices = 0..24
 ```
 
-P4-01 deliberately keeps **all** validated indices rather than cherry-picking
-"interesting" middle layers.
+P4-01 有意保留**所有**已验证索引，不挑选所谓“有趣”的中间层。
 
 Total:
 
@@ -69,23 +66,19 @@ Total:
 13 + 25 + 25 = 63 Backbone/Layer configurations
 ```
 
-This is computationally practical because the P3-02 cache design can fan out
-multiple hidden-state layers from one frozen SSL forward. The expensive SSL
-forward therefore need not be repeated once per layer.
+该计算方案可行，因为 P3-02 cache 设计能从一次冻结的 SSL forward 扩展出多个 hidden-state layers。因此无需为每一层重复执行成本较高的 SSL forward。
 
-Index 0 is retained because it is a real P1-validated member of
-`outputs.hidden_states`. It is reported as exact index 0 and is not mislabeled
-as paper "Layer 0" or Transformer block 0.
+保留索引 0，因为它确实是 P1 验证过的 `outputs.hidden_states` 成员。报告中将其标记为精确索引 0，不会误称为论文的“Layer 0”或 Transformer block 0。
 
-## 4. P4 selection metric
+## 4. P4 选择指标
 
-The P4 gate and the user's frozen plan require one primary ranking quantity:
+P4 Gate 和用户冻结的计划要求使用一个主要排序指标：
 
 ```text
 generic_dev_score = prototype_macro_f1
 ```
 
-For every Backbone/Layer configuration:
+对每个 Backbone/Layer 配置：
 
 ```text
 seed17 selected generic_dev_score
@@ -97,9 +90,9 @@ sample standard deviation
 95% Student-t confidence interval, df=2
 ```
 
-Because n=3, the 95% CI must use Student-t rather than `mean ± 1.96*SE`.
+由于 n=3，95% CI 必须使用 Student-t 分布，而不能使用 `mean ± 1.96*SE`。
 
-The ranking score is the **3-seed mean generic_dev_score**.
+排序分数为 **3-seed mean generic_dev_score**。
 
 Exact-mean tie break is frozen as:
 
@@ -107,13 +100,11 @@ Exact-mean tie break is frozen as:
 lower hidden_state_index
 ```
 
-This is only a deterministic exact-tie rule; it is not a claim that shallower
-layers are intrinsically better.
+这只是处理完全平分的确定性规则，并不表示较浅层天然更好。
 
-## 5. Metrics that should NOT select P4
+## 5. 不应用于选择 P4 的指标
 
-The following metrics are valuable, but they require an acceptance/rejection
-threshold and open-set calibration:
+以下指标有参考价值，但需要 acceptance/rejection threshold 和 open-set calibration：
 
 ```text
 Correct Accept Rate
@@ -123,13 +114,11 @@ Unknown Reject Rate / FAR
 ACC/DET @ 1% FAR
 ```
 
-Using them during P4 would mix Backbone/Layer selection with the later
-open-set/threshold qualification problem.
+在 P4 使用这些指标会把 Backbone/Layer 选择与后续 open-set/threshold 资格评估混在一起。
 
-Therefore they are deferred from P4 selection. They belong to the later
-Teacher qualification stage once the single Backbone/Layer mainline is frozen.
+因此，P4 选择阶段暂不使用这些指标。单一 Backbone/Layer 主线冻结后，再在 Teacher qualification 阶段评估。
 
-P4 may still record threshold-free embedding diagnostics:
+P4 仍可记录无需 threshold 的 embedding 诊断指标：
 
 ```text
 prototype_accuracy
@@ -141,9 +130,9 @@ embedding norm error
 collapse flag
 ```
 
-but none may override `generic_dev_score`.
+但任何一项都不能取代 `generic_dev_score`。
 
-## 6. P4 execution logic
+## 6. P4 执行流程
 
 ```text
 P4-01 candidate freeze
@@ -165,7 +154,7 @@ P4-08 freeze one Backbone + one exact hidden_state_index
 
 ## 7. P4-01 Gate
 
-PASS when:
+满足以下条件时通过：
 
 1. exact P1 model ids/revisions are frozen;
 2. candidate indices are a subset of P1-valid indices;

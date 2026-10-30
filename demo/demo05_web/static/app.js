@@ -170,14 +170,14 @@ function resetTask() {
   const now=new Date();set("taskId",`VB-${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${String(now.getTime()).slice(-4)}`);
 }
 
-async function presentUntilOutcome(token,started,getOutcome,explanations,presentationPrefix,instantStage) {
+async function presentUntilOutcome(token,started,getOutcome,explanations,presentationPrefix,instantStage,onPresentationProgress=null) {
   let nextStage=0;
   while(token===state.run) {
     const outcome=getOutcome();
     if(outcome?.error) throw outcome.error;
     const elapsed=performance.now()-started;
     if(state.mode==="presentation") {
-      const progress=Math.min(elapsed/PRESENTATION_MS,1);setProgress(progress);
+      const progress=Math.min(elapsed/PRESENTATION_MS,1);setProgress(progress);onPresentationProgress?.(progress);
       while(nextStage<explanations.length && elapsed>=nextStage*PRESENTATION_MS/explanations.length) {
         [...$("stageTrack").children].forEach((e,i)=>e.className=i<nextStage?"done":i===nextStage?"active":"");
         set("currentStage",`${presentationPrefix} · ${explanations[nextStage][0]}`);
@@ -425,7 +425,7 @@ async function recognizeContinuous(){
   document.body.dataset.state='running';$('resultCard').setAttribute('aria-busy','true');syncControls();
   set('heroTitle','长语音识别请求已发送');set('heroCaption',state.mode==='presentation'?'接口即时请求；长语音流程说明按讲解节奏展开。':'正在处理整段连续语音；结果将按时间轴返回。');
   set('analysisBadge',state.mode==='presentation'?'讲解进行中':'连续识别中');set('decisionBadge','处理中');set('taskStatus','处理中');set('taskBadge','长语音');set('streamState','记录中');
-  setClosure(0,'done','已接入');setClosure(1,'active','连续识别');setProgress(0);if(state.mode!=='presentation')set('progressText','—');
+  setClosure(0,'done','已接入');setClosure(1,'active','连续识别');setProgress(0);renderVisuals(0);if(state.mode!=='presentation')set('progressText','—');
   addEvent(`已提交长语音：${item?.display_name||item?.id||'当前样本'} / ${state.buffer.duration.toFixed(2)} 秒。`,state.mock?'模拟请求':'已发送');
   let outcome=null;
   const started=performance.now();
@@ -434,7 +434,7 @@ async function recognizeContinuous(){
     .then(result=>{outcome={result,requestMs:performance.now()-started};if(token===state.run){setClosure(1,'done','已返回');addEvent(state.mock?'模拟长语音接口已返回固定结果。':'长语音接口已返回结果。','已返回');}})
     .catch(error=>{outcome={error};});
   try{
-    await presentUntilOutcome(token,started,()=>outcome,CONTINUOUS_EXPLANATIONS,'长语音流程讲解','长语音识别请求进行中');
+    await presentUntilOutcome(token,started,()=>outcome,CONTINUOUS_EXPLANATIONS,'长语音流程讲解','长语音识别请求进行中',renderVisuals);
     await pending;
     if(token!==state.run)return;
     const result=outcome.result;

@@ -1,26 +1,22 @@
-# PAPR-SSL P0 Baseline Report
+# PAPR-SSL P0 基线报告
 
 Date: 2026-09-09 (Asia/Shanghai)
 
-P0 freezes the existing Teacher-first framework. It does not download or run a
-real SSL checkpoint, start P1, modify model mathematics, or add a new feature.
+P0 冻结现有的 Teacher-first 框架。本阶段不下载或运行真实 SSL checkpoint，不启动 P1，不修改模型数学定义，也不添加新功能。
 
-## 1. Repository Status
+## 1. 仓库状态
 
-- Repository: initialized Git worktree
-- Branch: `main`
-- History before P0: no commits (`HEAD` did not exist)
-- Tracked files before P0: none
-- Baseline role: first formal project commit
-- Legacy `whisper/papr` project: not modified and no Git operation performed
-- Python package import: PASS (`papr_ssl 0.1.0` and public Teacher APIs)
+- Repository：已初始化的 Git worktree
+- 分支：`main`
+- P0 之前的历史：没有 commit（`HEAD` 不存在）
+- P0 之前已跟踪的文件：无
+- 基线作用：首个正式项目 commit
+- Legacy `whisper/papr` 项目：未修改，也未执行 Git 操作
+- Python package import：PASS（`papr_ssl 0.1.0` 和公开 Teacher API）
 
-Before staging, the complete project appeared as untracked top-level paths. Git
-ignored `.learnings/` and Python caches. The baseline staging audit excludes
-local data, artifacts, model weights, HF caches, temporary files, and the local
-`docs/论文/` reference corpus.
+暂存前，整个项目以未跟踪的顶层路径出现。Git 忽略了 `.learnings/` 和 Python cache。基线暂存审计排除了本地数据、artifacts、模型权重、HF cache、临时文件以及本地 `docs/论文/` 参考资料库。
 
-## 2. Compile Check
+## 2. 编译检查
 
 Command:
 
@@ -28,15 +24,11 @@ Command:
 python -m compileall src tests scripts
 ```
 
-Result: **PASS**. `src/`, `tests/`, and the existing `scripts/` directory were
-processed without syntax errors or warnings.
+结果：**PASS**。`src/`、`tests/` 和现有 `scripts/` 目录均已处理，没有语法错误或警告。
 
-## 3. Test Results
+## 3. 测试结果
 
-The project README defines standard-library unittest discovery, and pytest is
-not installed in the audited environment. Tests were executed without network
-or model loading by adding the local `src/` directory to the process import
-path.
+项目 README 规定使用标准库 unittest discovery；审计环境未安装 pytest。测试通过将本地 `src/` 目录加入进程 import path 执行，全程未联网，也未加载模型。
 
 ```text
 tests collected: 22
@@ -47,12 +39,11 @@ skipped: 0
 result: PASS
 ```
 
-This matches the previously documented 22/22 baseline. No test was removed,
-skipped, relaxed, or replaced.
+这与此前记录的 22/22 基线一致。没有删除、跳过、放宽或替换任何测试。
 
-## 4. Git Hygiene
+## 4. Git 清洁度
 
-The following are ignored:
+以下内容会被忽略：
 
 - `datasets/*` except `datasets/README.md`
 - `artifacts/*` except `artifacts/README.md`
@@ -65,16 +56,13 @@ The following are ignored:
 - logs, outputs, temporary directories/files, and IDE caches
 - `docs/论文/`, which is a local reference corpus rather than baseline source
 
-Pre-staging inventory found no audio, NumPy array, checkpoint, or model-weight
-payload. Three local reference PDFs exceed 1 MB (maximum approximately 4.83 MB)
-under `docs/论文/`; the entire directory is ignored and excluded from the commit.
+暂存前清单中没有音频、NumPy array、checkpoint 或模型权重文件。`docs/论文/` 下有三份超过 1 MB 的本地参考 PDF（最大约 4.83 MB）；整个目录均被忽略，不会纳入 commit。
 
-No dataset, generated artifact, checkpoint, HF cache, model binary, temporary
-test output, or IDE cache is included in the baseline.
+基线中不包含数据集、生成的 artifact、checkpoint、HF cache、模型二进制文件、临时测试输出或 IDE cache。
 
-## 5. Sensitive File Check
+## 5. 敏感文件检查
 
-Filename and text-pattern audits found:
+文件名和文本模式审计结果：
 
 ```text
 Hugging Face token candidates: 0
@@ -83,14 +71,11 @@ Windows user-profile path candidates: 0
 .env / credential / secret / history files: 0
 ```
 
-Scans were filename-only for matches and did not print secret values. The local
-Legacy project path in README is a project-reference path, not a Windows user
-profile or runtime credential. `.env` and `.env.*` are ignored, while an
-intentional `.env.example` may be tracked in the future.
+扫描仅报告匹配文件名，没有输出机密值。README 中的本地 Legacy 项目路径用于引用项目，并非 Windows 用户配置文件路径或运行时凭据。`.env` 和 `.env.*` 均被忽略；未来可以有意跟踪 `.env.example`。
 
-## 6. Environment Snapshot
+## 6. 环境快照
 
-Environment used for imports and offline tests:
+用于 import 和离线测试的环境：
 
 | Item | Value |
 |---|---|
@@ -108,26 +93,17 @@ Environment used for imports and offline tests:
 | GPU | NVIDIA GeForce RTX 5060 Laptop GPU |
 | CUDA device count | 1 |
 
-CUDA availability is recorded only; offline unit tests did not run real SSL
-models. Importing the environment emits an existing SciPy/NumPy compatibility
-warning in some Transformers import paths. P0 does not alter dependencies to
-address it.
+这里只记录 CUDA 是否可用；离线单元测试没有运行真实 SSL 模型。部分 Transformers import 路径会产生已有的 SciPy/NumPy 兼容性警告。P0 不调整依赖来处理该问题。
 
-## 7. Files Changed
+## 7. 文件变更
 
-P0's functional changes are limited to:
+P0 的功能性变更仅限于：
 
 - `.gitignore`: hardens exclusions for secrets, caches, model binaries,
   temporary files, and the local reference corpus.
 - `docs/P0_BASELINE_REPORT.md`: records this verified baseline.
 
-Because the repository had no previous commit, the first baseline commit also
-captures all existing project source, configs, offline tests, Markdown reports,
-README files, and `pyproject.toml`. It does not capture ignored local content.
-After the staged diff check identified extra blank lines at EOF, 39 existing
-text files were mechanically normalized to end with exactly one newline.
-No algorithm, Backbone API, Mean DR, SCAF, TeacherOutput, embedding dimension,
-configuration value, or test logic changed during P0.
+由于仓库此前没有 commit，首个基线 commit 也收录了所有现有项目源码、config、离线测试、Markdown 报告、README 文件和 `pyproject.toml`，但不包含被忽略的本地内容。暂存 diff 检查发现文件末尾有多余空行后，39 个现有文本文件被机械地规范为恰好以一个换行符结尾。P0 未更改任何算法、Backbone API、Mean DR、SCAF、TeacherOutput、embedding dimension、配置值或测试逻辑。
 
 ## 8. Git Commit
 
@@ -138,10 +114,9 @@ configuration value, or test logic changed during P0.
   `git rev-parse HEAD`; the exact hash is reported in the task handoff because a
   commit cannot embed its own final hash without changing that hash.
 
-No push, rebase, reset, dependency installation, or history rewrite is part of
-P0.
+P0 不包含 push、rebase、reset、依赖安装或历史重写。
 
-## 9. Gate Checklist
+## 9. Gate 检查清单
 
 - [PASS] compileall
 - [PASS] offline tests — 22/22, 0 skipped
@@ -152,24 +127,15 @@ P0.
 
 **P0 GATE: PASS**
 
-## 10. Remaining Risks
+## 10. 剩余风险
 
-1. No real Wav2Vec2, WavLM, or W2v-BERT 2.0 checkpoint has been loaded; real
-   shapes, masks, hidden-state indexing, memory, and throughput remain unknown.
-2. Teacher configs still use `revision: main` as explicitly marked unpinned
-   development revisions.
-3. `pyproject.toml` contains dependency lower-bound proposals, not an isolated
-   PAPR-SSL lock file; environment pinning belongs to P1.
-4. The audited `whisper_v0` environment has an existing NumPy/SciPy compatibility
-   warning and no pytest installation. Unittest baseline results remain valid.
-5. Regex-based secret scanning reduces common risks but is not a substitute for
-   a dedicated secret scanner in a future CI pipeline.
-6. The ignored local `docs/论文/` corpus is not backed up or versioned by this Git
-   baseline.
+1. 尚未加载真实 Wav2Vec2、WavLM 或 W2v-BERT 2.0 checkpoint；实际 shape、mask、hidden-state 索引、内存和吞吐量仍未知。
+2. Teacher config 仍使用 `revision: main`，这是明确标注为未固定的开发 revision。
+3. `pyproject.toml` 记录的是依赖下限建议，不是独立的 PAPR-SSL lock file；环境固定属于 P1 范围。
+4. 审计使用的 `whisper_v0` 环境存在 NumPy/SciPy 兼容性警告，且未安装 pytest。Unittest 基线结果仍然有效。
+5. 基于 regex 的机密扫描可降低常见风险，但不能替代未来 CI pipeline 中的专用 secret scanner。
+6. 被忽略的本地 `docs/论文/` 资料库没有由此 Git 基线备份或版本控制。
 
-## 11. Recommended Next Step
+## 11. 建议的下一步
 
-Stop after P0. After explicit human confirmation, begin **P1 T-Integration**:
-create an isolated environment plan, then deliberately smoke-test the three real
-SSL checkpoints without starting Teacher training, Attention DR, KD, or Student
-development.
+P0 完成后暂停。经人工明确确认后，再开始 **P1 T-Integration**：制定隔离环境方案，然后有计划地对三个真实 SSL checkpoint 执行 smoke test；不启动 Teacher 训练、Attention DR、KD 或 Student 开发。

@@ -1,57 +1,57 @@
-# PAPR-SSL Teacher Integration Report
+# PAPR-SSL Teacher 集成报告
 
 **Document:** `docs/T_INTEGRATION_REPORT.md`
 
 **Project:** PAPR-SSL v1.0
 
-**Phase:** P1 — Teacher Integration
+**阶段：** P1 — Teacher 集成
 
 **Status:** **PASS**
 **Date:** 2026-09-10
 
 ---
 
-## 1. Purpose
+## 1. 目的
 
-This document records the completion and acceptance evidence for **P1 — Teacher Integration** in PAPR-SSL.
+本文档记录 PAPR-SSL **P1 — Teacher 集成**的完成情况和验收依据。
 
-The objective of P1 is to establish a reproducible, engineering-runnable teacher-side SSL backbone integration layer before any large-scale public-data experiments, teacher selection, representation-head training, SCAF training, knowledge distillation, or Student development.
+P1 的目标是在开展大规模公开数据实验、Teacher 选择、representation head 训练、SCAF 训练、knowledge distillation 或 Student 开发前，建立可复现且可供工程运行的 Teacher 侧 SSL backbone 集成层。
 
-P1 validates three pretrained SSL backbones:
+P1 验证三个预训练 SSL backbone：
 
 - `facebook/wav2vec2-base`
 - `microsoft/wavlm-large`
 - `facebook/w2v-bert-2.0`
 
-The scope of this report is restricted to **real-checkpoint integration and engineering validation**. It does **not** include P2+ dataset engineering, Teacher training, Mean DR/SCAF optimization, Attention DR comparison, KD, or Student evaluation.
+本报告范围仅限于**真实 checkpoint 集成和工程验证**。不包括 P2+ 数据集工程、Teacher 训练、Mean DR/SCAF 优化、Attention DR 对比、KD 或 Student 评估。
 
 ---
 
-## 2. P1 Acceptance Criteria
+## 2. P1 验收标准
 
-P1 is considered complete only when all of the following are satisfied:
+仅当满足以下所有条件时，P1 才算完成：
 
-1. A dedicated PAPR-SSL runtime environment exists and is reproducible.
-2. All three real pretrained SSL checkpoints can be loaded.
-3. All three models can complete real read-only forward passes.
-4. All backbones return a common `SSLBackboneOutput` contract.
-5. Hidden-state indexing is explicit and validated.
-6. Batch and mask behavior is understood and does not silently misalign.
-7. Formal candidate layers are checked as VALID/INVALID on real checkpoints.
-8. CPU/GPU engineering resource usage is measured on the actual development machine.
-9. Hugging Face revisions are pinned from mutable `main` to immutable 40-character commit hashes.
-10. Real-checkpoint integration tests exist but are not mixed into the default offline unit-test suite.
-11. No silent fallback from one backbone implementation to another is permitted.
+1. 已建立专用且可复现的 PAPR-SSL runtime 环境。
+2. 三个真实预训练 SSL checkpoint 均可加载。
+3. 三个模型均可完成真实只读 forward pass。
+4. 所有 backbone 均返回通用 `SSLBackboneOutput` 契约。
+5. Hidden-state 索引明确且通过验证。
+6. Batch 和 mask 行为已确认，不会静默错位。
+7. 已在真实 checkpoint 上检查正式候选 layer 的 VALID/INVALID 状态。
+8. 已在实际开发机器上测量 CPU/GPU 工程资源用量。
+9. Hugging Face revision 已从可变的 `main` 固定为不可变的 40 字符 commit hash。
+10. 已提供真实 checkpoint 集成测试，且未混入默认离线单元测试套件。
+11. 禁止从一种 backbone 实现静默回退到另一种实现。
 
-All criteria above are satisfied.
+以上条件均已满足。
 
 ---
 
-## 3. Development Environment
+## 3. 开发环境
 
-### 3.1 Local development machine
+### 3.1 本地开发机器
 
-The P1 resource measurements were collected on the actual Windows development machine.
+P1 资源测量数据采集自实际使用的 Windows 开发机器。
 
 - Operating system: Windows 10/11 kernel family (`Windows-10-10.0.26200-SP0` as reported by Python)
 - CPU: Intel64 Family 6 Model 183, GenuineIntel
@@ -59,15 +59,15 @@ The P1 resource measurements were collected on the actual Windows development ma
 - GPU: NVIDIA GeForce RTX 5060 Laptop GPU
 - CUDA runtime reported by PyTorch: 12.8
 
-### 3.2 Python environment
+### 3.2 Python 环境
 
-Dedicated Conda environment:
+专用 Conda 环境：
 
 ```text
 papr_ssl
 ```
 
-Key versions recorded during P1:
+P1 期间记录的主要版本：
 
 ```text
 Python              3.11.16
@@ -83,20 +83,20 @@ huggingface_hub     1.30.0
 CUDA runtime        12.8
 ```
 
-P1-10 additionally records:
+P1-10 还记录了：
 
 ```text
 artifacts/p1_10/pip_freeze.txt
 artifacts/p1_10/key_dependencies.json
 ```
 
-These files provide the full Python package snapshot and the key dependency snapshot used for the final pinned-checkpoint validation.
+这些文件提供完整的 Python package 快照和关键依赖快照，记录最终 pinned-checkpoint 验证所用的环境。
 
 ---
 
-## 4. Common SSL Backbone Contract
+## 4. 通用 SSL Backbone 契约
 
-All three backbones are integrated through a common output contract:
+三个 backbone 均通过通用输出契约集成：
 
 ```text
 SSLBackboneOutput
@@ -105,9 +105,9 @@ SSLBackboneOutput
 └── hidden_layer: int
 ```
 
-The selected `hidden_layer` corresponds to the **exact index in `outputs.hidden_states`**.
+所选 `hidden_layer` 对应 `outputs.hidden_states` 中的**精确索引**。
 
-The P1 waveform-level input contract used for smoke and resource validation is:
+P1 用于 smoke 和资源验证的 waveform 级输入契约如下：
 
 ```text
 batch size      = 1
@@ -117,13 +117,13 @@ samples/window  = 16000
 waveform dtype  = float32
 ```
 
-The three backbones are allowed to retain their own internal frontend implementations. P1 does not force an artificial frontend unification.
+三个 backbone 可以保留各自的内部 frontend 实现。P1 不强行进行人为的 frontend 统一。
 
 ---
 
-## 5. P1-04 — Wav2Vec2 Real Integration
+## 5. P1-04 — Wav2Vec2 真实集成
 
-### 5.1 Model
+### 5.1 模型
 
 ```text
 kind:        wav2vec2
@@ -142,7 +142,7 @@ Configured hidden layer:
 12
 ```
 
-### 5.2 Real forward result
+### 5.2 真实 forward 结果
 
 Observed model structure:
 
@@ -166,31 +166,31 @@ The selected raw hidden state and wrapper output shape match exactly.
 
 ### 5.3 Frontend
 
-Wav2Vec2 receives raw waveform input:
+Wav2Vec2 接收原始 waveform 输入：
 
 ```text
 input_values = [1, 16000]
 ```
 
-P1 frontend alignment check:
+P1 frontend 对齐检查：
 
 ```text
 PASS
 ```
 
-### 5.4 Load-report note
+### 5.4 Load report 说明
 
-When loading `Wav2Vec2Model` from `facebook/wav2vec2-base`, Transformers reports several pretraining-only parameters as `UNEXPECTED`, such as quantizer/projector weights.
+从 `facebook/wav2vec2-base` 加载 `Wav2Vec2Model` 时，Transformers 会将若干仅用于预训练的参数（如 quantizer/projector 权重）报告为 `UNEXPECTED`。
 
-This is accepted for P1 because the project intentionally uses the bare Wav2Vec2 representation model rather than the complete pretraining objective stack.
+P1 接受这一情况，因为项目有意使用基础 Wav2Vec2 表征模型，而不是完整的预训练目标组件。
 
-No missing representation-path parameter or silent fallback was observed.
+未发现表征路径参数缺失或静默回退。
 
 ---
 
-## 6. P1-05 — WavLM Real Integration
+## 6. P1-05 — WavLM 真实集成
 
-### 6.1 Model
+### 6.1 模型
 
 ```text
 kind:        wavlm
@@ -209,7 +209,7 @@ Configured hidden layer:
 24
 ```
 
-### 6.2 Real forward result
+### 6.2 真实 forward 结果
 
 Observed structure:
 
@@ -231,13 +231,13 @@ finite      = True
 
 ### 6.3 Frontend
 
-WavLM receives raw waveform input:
+WavLM 接收原始 waveform 输入：
 
 ```text
 input_values = [1, 16000]
 ```
 
-Frontend alignment check:
+Frontend 对齐检查：
 
 ```text
 PASS
@@ -245,9 +245,9 @@ PASS
 
 ---
 
-## 7. P1-06 — W2v-BERT 2.0 Real Integration
+## 7. P1-06 — W2v-BERT 2.0 真实集成
 
-### 7.1 Model
+### 7.1 模型
 
 ```text
 kind:        w2v_bert2
@@ -266,7 +266,7 @@ Configured hidden layer:
 24
 ```
 
-### 7.2 Real forward result
+### 7.2 真实 forward 结果
 
 Observed structure:
 
@@ -288,7 +288,7 @@ finite      = True
 
 ### 7.3 Frontend
 
-W2v-BERT 2.0 uses its own feature extractor before the Transformer stack.
+W2v-BERT 2.0 在 Transformer stack 前使用自身的 feature extractor。
 
 Observed model inputs:
 
@@ -303,7 +303,7 @@ Wrapper output mask:
 frame_mask = [1, 49] bool
 ```
 
-Frontend and output temporal dimensions are aligned.
+Frontend 与输出的时间维度已对齐。
 
 P1 frontend alignment check:
 
@@ -313,19 +313,19 @@ PASS
 
 ---
 
-## 8. P1-07 — Batch / Padding / Mask Validation
+## 8. P1-07 — Batch / Padding / Mask 验证
 
-The current P1 public wrapper API accepts fixed-window waveforms and does not expose explicit waveform lengths or a waveform-validity mask.
+当前 P1 public wrapper API 接受固定窗口 waveform，不提供显式 waveform 长度或 waveform-validity mask。
 
-Therefore, arbitrary zero-padded tail semantics cannot be inferred honestly: a zero-valued tail may represent either padding or valid silence.
+因此，无法可靠推断任意零填充尾部的语义：值为零的尾部既可能是 padding，也可能是有效静音。
 
-P1-07 consequently distinguishes between:
+因此，P1-07 区分以下情况：
 
-- singleton validation;
-- true multi-sample full-length batch validation;
-- true padded-batch semantics, marked N/A under the current fixed-window contract.
+- singleton 验证；
+- 真实的多样本完整长度 batch 验证；
+- 当前固定窗口契约下标记为 N/A 的真实 padded-batch 语义。
 
-Formal status:
+正式状态：
 
 ```text
 PASS_WITH_PADDED_NA
@@ -361,17 +361,17 @@ valid frames       = [49, 49, 49]
 singleton/batch max diff ≈ 5.92e-4
 ```
 
-The small singleton-vs-batch differences are within normal floating-point differences produced by GPU execution paths and do not indicate a contract violation.
+singleton 与 batch 之间的微小差异属于 GPU 执行路径产生的正常浮点差异，不代表违反契约。
 
 ---
 
-## 9. P1-08 — Candidate Layer Validity
+## 9. P1-08 — 候选 Layer 有效性
 
-Candidate layers are taken from the formal Teacher layer-sweep configuration and expanded by the project's `load_layer_sweep()` implementation.
+候选 layer 来自正式 Teacher layer-sweep 配置，并由项目的 `load_layer_sweep()` 实现展开。
 
-This step checks structural validity only.
+此步骤仅检查结构有效性。
 
-It does **not** claim that a VALID layer is the best representation layer.
+这**不代表** VALID layer 就是最佳表征 layer。
 
 ### 9.1 Wav2Vec2
 
@@ -451,13 +451,13 @@ Overall P1-08 result:
 PASS
 ```
 
-These candidate sets may proceed to P4 representation-quality comparison.
+这些候选集合可以进入 P4 表征质量对比。
 
 ---
 
-## 10. P1-09 — CPU/GPU Resource Benchmark
+## 10. P1-09 — CPU/GPU 资源基准测试
 
-### 10.1 Protocol
+### 10.1 协议
 
 Formal P1-09 benchmark protocol:
 
@@ -471,11 +471,11 @@ warmup runs    = 10
 timed runs     = 50
 ```
 
-CPU and CUDA measurements were executed in separate processes.
+CPU 和 CUDA 测量分别在独立进程中执行。
 
-Teacher integration is not optimized for minimum latency. The requirement is engineering runnability on the actual development machine.
+Teacher 集成并未针对最低延迟进行优化；本阶段要求是在实际开发机器上具备工程可运行性。
 
-### 10.2 Final benchmark summary
+### 10.2 最终基准汇总
 
 | Backbone | CPU Mean | CPU P95 | CPU Peak RSS | GPU Mean | GPU P95 | GPU Peak Allocated | GPU Peak Reserved |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -483,7 +483,7 @@ Teacher integration is not optimized for minimum latency. The requirement is eng
 | WavLM Large | 106.45 ms | 141.77 ms | 1891.9 MB | 19.70 ms | 24.58 ms | 1261.6 MB | 1282 MB |
 | W2v-BERT 2.0 | 201.25 ms | 217.57 ms | 2858.4 MB | 32.84 ms | 34.56 ms | 2231.2 MB | 2246 MB |
 
-### 10.3 Load time
+### 10.3 加载时间
 
 | Backbone | CPU Load | GPU Load |
 |---|---:|---:|
@@ -491,7 +491,7 @@ Teacher integration is not optimized for minimum latency. The requirement is eng
 | WavLM Large | 3.68 s | 3.95 s |
 | W2v-BERT 2.0 | 3.69 s | 5.06 s |
 
-### 10.4 CPU process-memory observations
+### 10.4 CPU 进程内存观察
 
 Wav2Vec2:
 
@@ -520,9 +520,9 @@ observed peak RSS         ≈ 2858.4 MB
 peak increment            ≈ 2362.4 MB
 ```
 
-CPU host-memory measurement uses Windows `GetProcessMemoryInfo` / `PROCESS_MEMORY_COUNTERS_EX`, which captures process-level native allocations rather than Python-only allocations.
+CPU 主机内存测量使用 Windows `GetProcessMemoryInfo` / `PROCESS_MEMORY_COUNTERS_EX`，统计进程级原生内存分配，而非仅统计 Python 分配。
 
-### 10.5 GPU memory observations
+### 10.5 GPU 内存观察
 
 Wav2Vec2:
 
@@ -548,20 +548,20 @@ forward peak allocated        ≈ 2231.2 MB
 forward peak reserved         ≈ 2246.0 MB
 ```
 
-### 10.6 Engineering conclusion
+### 10.6 工程结论
 
-All three Teacher backbones are engineering-runnable on the current development machine.
+三个 Teacher backbone 均可在当前开发机器上正常运行。
 
-Even W2v-BERT 2.0, the heaviest P1 candidate, completes a 1-second input forward in approximately:
+即使是 P1 中开销最大的 W2v-BERT 2.0，也可在约以下时间内完成 1 秒输入的 forward：
 
 ```text
 CPU mean ≈ 201 ms
 GPU mean ≈ 32.8 ms
 ```
 
-Therefore, local development is not restricted to a trivial smoke-only path. The machine is sufficient for real integration, debugging, bounded feature extraction, and Teacher-side development.
+因此，本地开发不局限于简单 smoke test。该机器足以进行真实集成、调试、有限规模的 feature 提取和 Teacher 侧开发。
 
-For larger public-data sweeps, repeated layer extraction, or long-running experiments, a server/GPU environment may still be more operationally efficient. That is a workflow consideration rather than a P1 engineering blocker.
+对于更大规模的公开数据 sweep、重复 layer 提取或长时间实验，server/GPU 环境可能更高效。这属于工作流考量，不构成 P1 工程阻塞项。
 
 P1-09 result:
 
@@ -571,17 +571,17 @@ PASS
 
 ---
 
-## 11. P1-10 — Immutable Revision Pinning
+## 11. P1-10 — 固定不可变 Revision
 
-All three Hugging Face checkpoints were changed from mutable:
+三个 Hugging Face checkpoint 均从可变 revision：
 
 ```text
 revision: main
 ```
 
-to immutable 40-character commit hashes.
+固定为不可变的 40 字符 commit hash。
 
-### 11.1 Final pinned model table
+### 11.1 最终固定模型表
 
 | Kind | Model | Immutable revision |
 |---|---|---|
@@ -589,11 +589,11 @@ to immutable 40-character commit hashes.
 | `wavlm` | `microsoft/wavlm-large` | `c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c` |
 | `w2v_bert2` | `facebook/w2v-bert-2.0` | `da985ba0987f70aaeb84a80f2851cfac8c697a7b` |
 
-Pinned revisions were written into the Teacher YAML configurations.
+固定后的 revision 已写入 Teacher YAML 配置。
 
-### 11.2 Post-pin real smoke validation
+### 11.2 固定 Revision 后的真实 smoke 验证
 
-All three models were reloaded from their immutable revisions and completed real CUDA forward passes.
+三个模型均从不可变 revision 重新加载，并成功完成真实 CUDA forward pass。
 
 Wav2Vec2:
 
@@ -628,7 +628,7 @@ frontend align    = True
 SMOKE RESULT      = PASS
 ```
 
-The pinned revisions therefore preserve the same real-backbone contract established earlier in P1.
+因此，固定后的 revision 保持了 P1 前期建立的真实 backbone 契约。
 
 P1-10 result:
 
@@ -638,9 +638,9 @@ PASS
 
 ---
 
-## 12. P1-11 — Real-Checkpoint Integration Tests
+## 12. P1-11 — 真实 Checkpoint 集成测试
 
-P1-11 adds a dedicated real-model integration-test layer without contaminating the default offline unit-test suite.
+P1-11 增加专用的真实模型集成测试层，不会影响默认离线单元测试套件。
 
 Integration test files:
 
@@ -653,9 +653,9 @@ tests/
     └── test_real_ssl_backbones.py
 ```
 
-### 12.1 Default offline suite
+### 12.1 默认离线测试套件
 
-The default unit tests do not load large Hugging Face checkpoints.
+默认单元测试不会加载大型 Hugging Face checkpoint。
 
 Command:
 
@@ -676,9 +676,9 @@ Status:
 22 / 22 PASS
 ```
 
-### 12.2 Explicit real-model test mode
+### 12.2 显式真实模型测试模式
 
-Real-checkpoint tests require explicit opt-in:
+真实 checkpoint 测试需要显式启用：
 
 ```powershell
 python -m pytest tests/integration/test_real_ssl_backbones.py `
@@ -707,17 +707,17 @@ Status:
 4 / 4 PASS
 ```
 
-### 12.3 Network/cache isolation
+### 12.3 网络/cache 隔离
 
-`--hf-mode cache` explicitly uses local Hugging Face cache/offline mode.
+`--hf-mode cache` 明确使用本地 Hugging Face cache/离线模式。
 
-Therefore, routine P1 integration verification can be run without silently downloading large checkpoints.
+因此，常规 P1 集成验证不会静默下载大型 checkpoint。
 
-Network access can be explicitly enabled only when intentionally requested.
+只有在有意请求时，才会显式启用网络访问。
 
-### 12.4 Integration-test assertions
+### 12.4 集成测试断言
 
-The real-model tests validate:
+真实模型测试会验证：
 
 - expected backbone kind;
 - expected model identifier;
@@ -741,7 +741,7 @@ PASS
 
 ---
 
-## 13. P1 Task Status
+## 13. P1 任务状态
 
 | Task | Description | Result |
 |---|---|---|
@@ -760,9 +760,9 @@ PASS
 
 ---
 
-## 14. Final P1 Gate Decision
+## 14. P1 最终 Gate 决策
 
-### 14.1 Functional integration
+### 14.1 功能集成
 
 ```text
 Wav2Vec2      PASS
@@ -770,9 +770,9 @@ WavLM         PASS
 W2v-BERT 2.0  PASS
 ```
 
-All three backbones complete real forward passes and satisfy the common representation contract.
+三个 backbone 均已完成真实 forward pass，并满足通用表征契约。
 
-### 14.2 Hidden-state indexing
+### 14.2 Hidden-state 索引
 
 ```text
 Wav2Vec2      13 observed hidden states, valid [0,12]
@@ -780,9 +780,9 @@ WavLM         25 observed hidden states, valid [0,24]
 W2v-BERT 2.0  25 observed hidden states, valid [0,24]
 ```
 
-No hidden-layer indexing ambiguity remains for the current Transformers/model revisions.
+当前 Transformers/model revision 下的 hidden-layer 索引没有歧义。
 
-### 14.3 Mask alignment
+### 14.3 Mask 对齐
 
 ```text
 Wav2Vec2      PASS
@@ -790,11 +790,11 @@ WavLM         PASS
 W2v-BERT 2.0  PASS
 ```
 
-No temporal mask/output misalignment was observed.
+未发现 temporal mask 与输出错位。
 
-True variable-length padded-batch semantics remain outside the fixed-window P1 wrapper contract and are explicitly recorded as N/A rather than inferred.
+真正的变长 padded-batch 语义不在 P1 固定窗口 wrapper 契约范围内，因此明确记录为 N/A，而不做推断。
 
-### 14.4 Reproducibility
+### 14.4 可复现性
 
 ```text
 model revisions pinned      PASS
@@ -802,9 +802,9 @@ dependency versions saved   PASS
 post-pin real smoke         PASS
 ```
 
-All production candidate checkpoints use immutable commit hashes.
+所有生产候选 checkpoint 均使用不可变 commit hash。
 
-### 14.5 Test isolation
+### 14.5 测试隔离
 
 ```text
 offline unit tests          22/22 PASS
@@ -813,11 +813,11 @@ real tests explicit opt-in   PASS
 cache-only validation        PASS
 ```
 
-Real model tests do not contaminate the ordinary offline test path.
+真实模型测试不会影响常规离线测试流程。
 
-### 14.6 Engineering runnability
+### 14.6 工程可运行性
 
-All three models fit and execute successfully on the actual development machine.
+三个模型均可在实际开发机器上加载并成功运行。
 
 Peak GPU allocation for the heaviest model, W2v-BERT 2.0, is approximately:
 
@@ -831,15 +831,15 @@ and the measured CUDA mean forward latency for a 1-second input is approximately
 32.84 ms
 ```
 
-No P1 engineering blocker remains.
+P1 不再有工程阻塞项。
 
 ---
 
 # P1 FINAL RESULT: PASS
 
-**Teacher Integration is accepted and closed.**
+**Teacher 集成已验收并关闭。**
 
-The project may proceed to **P2 — Public Data Engineering**.
+项目可以进入 **P2 — 公共数据工程**。
 
 P2 should build on the frozen P1 contracts and must not silently alter:
 

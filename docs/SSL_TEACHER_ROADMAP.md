@@ -1,26 +1,21 @@
-# SSL Teacher Roadmap
+# SSL Teacher 路线图
 
-| Stage | Scope | Gate |
+| 阶段 | 范围 | 门槛 |
 |---|---|---|
-| T0 | Wav2Vec2 + Mean DR | Offline contract and unit tests pass. |
-| T1 | WavLM + Mean DR | Offline wrapper/factory tests pass; real integration deferred. |
-| T2 | W2v-BERT 2.0 + Mean DR | Feature-extractor → `input_features` flow passes offline tests. |
-| T3 | Layer sweep per backbone | Candidate expansion is unique; real indices validated without fallback. |
-| T4 | Select backbone + layer on `generic_dev_score` | Same split, budget, head, SCAF, and metrics. |
-| T5 | Mean DR vs Attention DR | Begin only after T4 is frozen. |
-| T6 | Best single layer vs Layer Fusion | Begin only after T5 is frozen. |
-| T7 | E0 Teacher qualification | All development gates and reports pass. |
-| T8 | Freeze Teacher | Pin code, model revision, dependency lock, checkpoint, and protocol. |
-| T9 | Open `generic_test` | First permitted access to final generic test. |
-| T10 | Cross-domain evaluation | Frozen Teacher and threshold policy; no Teacher retraining. |
-| T11 | Teacher target export | Versioned/hash-verified cross-framework target contract. |
-| T12 | KD Student | Start only after Teacher targets and qualification are frozen. |
+| T0 | Wav2Vec2 + Mean DR | 离线契约和单元测试通过。 |
+| T1 | WavLM + Mean DR | 离线 wrapper/factory 测试通过；真实集成暂缓。 |
+| T2 | W2v-BERT 2.0 + Mean DR | Feature-extractor 到 `input_features` 的流程通过离线测试。 |
+| T3 | 各 backbone 的 Layer sweep | 候选展开后无重复；真实索引通过验证且不使用 fallback。 |
+| T4 | 在 `generic_dev_score` 上选择 backbone 和 layer | 使用相同的 split、budget、head、SCAF 和 metrics。 |
+| T5 | Mean DR 与 Attention DR 对比 | 仅在 T4 冻结后开始。 |
+| T6 | 最佳单层与 Layer Fusion 对比 | 仅在 T5 冻结后开始。 |
+| T7 | E0 Teacher 资格确认 | 所有开发 gate 和报告均通过。 |
+| T8 | 冻结 Teacher | 固定代码、model revision、dependency lock、checkpoint 和 protocol。 |
+| T9 | 开放 `generic_test` | 首次允许访问最终 generic test。 |
+| T10 | 跨域评估 | 使用已冻结的 Teacher 和 threshold policy；不重新训练 Teacher。 |
+| T11 | 导出 Teacher target | 建立带版本和 hash 校验的跨框架 target 契约。 |
+| T12 | KD Student | 仅在 Teacher target 和资格确认冻结后开始。 |
 
-`generic_test` is sealed before T9. It must not influence stages T0–T8, including
-backbone, hidden-layer, checkpoint, threshold, Attention DR, or Layer Fusion
-selection.
+T9 之前，`generic_test` 必须保持封存。它不得影响 T0–T8 阶段的任何选择，包括 backbone、hidden-layer、checkpoint、threshold、Attention DR 或 Layer Fusion。
 
-The immediate next phase is **T-Integration**, not Attention DR: run real
-Wav2Vec2, WavLM, and W2v-BERT 2.0 smoke tests; verify processors/frontends,
-actual `[T,D]`, masks, exact hidden-state indexing, memory, and throughput; then
-pin model revisions and dependency versions.
+下一阶段是 **T-Integration**：运行真实 Wav2Vec2、WavLM 和 W2v-BERT 2.0 smoke test；验证 processor/frontend、实际 `[T,D]`、mask、hidden-state 精确索引、内存和吞吐量；随后固定 model revision 和 dependency 版本。

@@ -1,36 +1,35 @@
-# P6 Unknown Exposure Audit v2 — Core30 schema fix
+# P6 Unknown Exposure Audit v2 — Core30 Schema 修复
 
-The previous version failed with:
+上一版本因以下错误失败：
 
 ```text
 RuntimeError: expected 30 normalized Core30 phrases, got 0
 ```
 
-This was a schema-parsing bug in the audit script, not a data problem.
+这是 audit script 的 schema 解析错误，不是数据问题。
 
-The P2 task-index files should be parsed through the project's existing:
+P2 task-index files 应通过项目现有的以下函数解析：
 
 ```python
 papr_ssl.training.teacher.real_experiment.load_real_task_rows
 ```
 
-rather than assuming that the JSONL task index directly stores phrase text in
-a top-level `label` or `label_text` field.
+不应假设 JSONL task index 会把短语文本直接存放在顶层 `label` 或 `label_text` 字段。
 
-## Run
+## 运行
 
-Use the new v2 output directory, so the failed v1 artifact is not overwritten:
+使用新的 v2 输出目录，以免覆盖失败的 v1 artifact：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates_v2.py
 python scripts/review_p6_unknown_exposure_audit_v2.py
 ```
 
-If the full MDSC manifest cannot be auto-discovered, pass it explicitly:
+如果无法自动发现完整的 MDSC manifest，请显式传入：
 
 ```powershell
 python scripts/audit_p6_unknown_exposure_candidates_v2.py `
   --mdsc-manifest path\to\full_mdsc_manifest.jsonl
 ```
 
-No model training is performed. `generic_test` remains sealed.
+本流程不执行模型训练。`generic_test` 继续封存。

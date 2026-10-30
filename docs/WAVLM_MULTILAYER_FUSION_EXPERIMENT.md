@@ -1,6 +1,6 @@
-# WavLM Multi-Layer Fusion Experiment
+# WavLM 多层融合实验
 
-## Scientific question
+## 科学问题
 
 The current Project-1 Teacher uses:
 
@@ -11,19 +11,19 @@ WavLM-large hidden_states[15]
 -> SCAF
 ```
 
-The dimension sweep improved the closed-set 3-seed mean to approximately:
+维度 sweep 将 closed-set 3-seed mean 提高到约：
 
 ```text
 0.912667 Macro-F1
 ```
 
-This experiment asks a new, isolated question:
+本实验单独检验一个新问题：
 
 > Can nearby WavLM layers provide complementary information beyond layer 15?
 
 ## Arms
 
-### Control
+### Control 对照组
 
 ```text
 WavLM layer 15
@@ -32,7 +32,7 @@ WavLM layer 15
 -> same SCAF
 ```
 
-### Learnable multi-layer fusion
+### 可学习的多层融合
 
 ```text
 WavLM layers 13,14,15,16,17
@@ -53,7 +53,7 @@ same Attention DR
 same SCAF
 ```
 
-The trainable fusion has only five scalar logits:
+可训练融合仅包含五个 scalar logits：
 
 ```math
 alpha_l = exp(w_l) / sum_j exp(w_j)
@@ -61,29 +61,27 @@ alpha_l = exp(w_l) / sum_j exp(w_j)
 H_fused = sum_l alpha_l H^(l)
 ```
 
-WavLM remains completely frozen.
+WavLM 始终完全冻结。
 
 ## Cache
 
-The experiment must first build a train/dev-only hidden-state cache for layers 13..17.
+实验开始前，必须先为 layers 13..17 建立仅含 train/dev 的 hidden-state cache。
 
-Default storage is float16 to reduce disk usage. Both the control and fusion
-arms use this same cache, so precision is controlled.
+默认以 float16 存储以减少磁盘占用。Control 和 fusion 两组使用同一份 cache，以控制精度影响。
 
-Expected size is roughly five times one layer, halved by float16. With the prior
-frame count this should be around 4.9 GiB of feature tensors.
+预计大小约为单层的五倍，再因 float16 减半。按此前的帧数计算，feature tensors 约占 4.9 GiB。
 
-No test rows are loaded.
+不加载 test rows。
 
-## Run order
+## 运行顺序
 
-### 1. Build cache
+### 1. 构建 Cache
 
 ```powershell
 python scripts/build_wavlm_layers13_17_cache.py --device cuda
 ```
 
-### 2. Smoke test
+### 2. Smoke Test
 
 ```powershell
 python scripts/run_wavlm_multilayer_fusion.py `
@@ -91,25 +89,25 @@ python scripts/run_wavlm_multilayer_fusion.py `
   --output-dir artifacts/p6_wavlm_multilayer_fusion_smoke
 ```
 
-### 3. Full experiment
+### 3. 完整实验
 
 ```powershell
 python scripts/run_wavlm_multilayer_fusion.py
 ```
 
-### 4. Summarize
+### 4. 汇总
 
 ```powershell
 python scripts/summarize_wavlm_multilayer_fusion.py
 ```
 
-### 5. Audit
+### 5. 审计
 
 ```powershell
 python scripts/audit_wavlm_multilayer_fusion.py
 ```
 
-## Frozen settings
+## 冻结的设置
 
 ```text
 MDSC Core30 train/dev
@@ -128,16 +126,15 @@ selection = dev prototype Macro-F1
 generic_test = sealed
 ```
 
-## Promotion rule
+## 晋级规则
 
-Do not promote multi-layer fusion solely because one seed is higher.
+不得仅因某一个 seed 分数更高就晋级多层融合方案。
 
-First require:
+首先必须满足：
 - a reasonable 3-seed mean improvement over the same-cache single15 control;
 - no pathological variance;
 - sensible learned layer weights.
 
-If that passes, the next experiment is the same 15-shot personalized/open-set
-comparison already used for the 256D Teacher.
+若通过，下一步实验将沿用 256D Teacher 已执行过的 15-shot 个性化/open-set 比较。
 
-The canonical 64D Teacher remains untouched for Project 2.
+Project 2 的规范 64D Teacher 保持不变。

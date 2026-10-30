@@ -1,28 +1,28 @@
-# P3-07 — Dev-only Checkpoint Selection
+# P3-07 — 仅使用 Dev 选择 Checkpoint
 
-## Frozen rule
+## 冻结规则
 
-Every checkpoint is compared using only:
+每个 checkpoint 只能依据以下指标进行比较：
 
 ```text
 generic_dev_score
 ```
 
-whose P3-05 definition is frozen as:
+P3-05 将其定义冻结为：
 
 ```text
 prototype_macro_f1
 ```
 
-The selection rule is:
+选择规则为：
 
 ```text
 maximize generic_dev_score
 ```
 
-No other metric can override it.
+任何其他指标都不能取代此规则。
 
-## Why one metric?
+## 为什么只用一个指标？
 
 P3-05 records many diagnostics:
 
@@ -35,13 +35,11 @@ top1_top2_margin_mean
 ...
 ```
 
-Those diagnostics help explain the embedding space, but if we are allowed to
-choose whichever metric makes a checkpoint look best after training, model
-selection becomes subjective.
+这些诊断指标有助于理解 embedding space，但如果训练后可以任意选择最有利于某个 checkpoint 的指标，模型选择就会变得主观。
 
-Therefore P3-07 has exactly one ranking metric.
+因此，P3-07 只使用一个排序指标。
 
-## Tie break
+## 平分处理
 
 If two checkpoints have exactly the same `generic_dev_score`:
 
@@ -49,28 +47,25 @@ If two checkpoints have exactly the same `generic_dev_score`:
 choose the earliest epoch
 ```
 
-This is frozen in advance.
+此规则需预先冻结。
 
-The reason is not that earlier is always scientifically better. It is simply a
-deterministic predeclared rule that avoids consulting another metric after a
-tie.
+这并不表示更早的 epoch 在科学上总是更好，而是一条预先声明的确定性规则，可避免平分后再参考其他指标。
 
-## Test remains sealed
+## Test 保持封存
 
-P3-07 must not receive or inspect any `generic_test` value.
+P3-07 不得接收或查看任何 `generic_test` 值。
 
-The selector fails closed if its input metrics contain any test-related field.
+如果输入 metrics 含有任何与 test 相关的字段，selector 会拒绝继续执行。
 
-The normal P3 data path already prevents test construction in P3-04.
+常规 P3 数据路径已通过 P3-04 阻止构造 test dataset。
 
-## Checkpoint integrity
+## Checkpoint 完整性
 
-Before a checkpoint can be selected, P3-07 recomputes its SHA-256 and verifies
-it against the hash recorded by P3-05.
+选择 checkpoint 前，P3-07 会重新计算其 SHA-256，并与 P3-05 记录的 hash 比对。
 
-A mismatched or missing checkpoint fails selection.
+Checkpoint 缺失或 hash 不匹配时，选择失败。
 
-## No `best.pt` copy
+## 不复制为 `best.pt`
 
 P3-07 writes a small immutable pointer:
 
@@ -79,7 +74,7 @@ seed_0017/
 └── selected_checkpoint.json
 ```
 
-It does not create another untracked binary copy named `best.pt`.
+它不会再创建名为 `best.pt` 的未跟踪二进制副本。
 
 The pointer records:
 
@@ -93,8 +88,7 @@ selection metric
 tie-break policy
 ```
 
-For a multi-seed experiment, one checkpoint is selected independently for each
-seed:
+对于 multi-seed 实验，每个 seed 都会独立选择一个 checkpoint：
 
 ```text
 seed 17 -> one dev-selected checkpoint
@@ -102,11 +96,11 @@ seed 29 -> one dev-selected checkpoint
 seed 43 -> one dev-selected checkpoint
 ```
 
-A top-level `selected_checkpoints.json` can then reference all three.
+之后，顶层的 `selected_checkpoints.json` 可以引用这三个结果。
 
 ## P3-07 Gate
 
-PASS requires:
+满足以下条件时通过：
 
 1. only `generic_dev_score` determines ranking;
 2. `generic_dev_score_name == prototype_macro_f1`;

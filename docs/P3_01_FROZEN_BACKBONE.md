@@ -1,16 +1,14 @@
-# P3-01 — Frozen SSL Backbone Contract
+# P3-01 — 冻结 SSL Backbone 契约
 
-## Goal
+## 目标
 
-During P3 baseline training, the pretrained SSL backbone is a **fixed feature
-extractor**.
+在 P3 基线训练期间，预训练 SSL backbone 是**固定特征提取器**。
 
-The trainable representation head must not update Wav2Vec2, WavLM, or
-W2v-BERT 2.0 parameters.
+可训练的表征 head 不得更新 Wav2Vec2、WavLM 或 W2v-BERT 2.0 参数。
 
-## Frozen contract
+## 冻结契约
 
-For every SSL backbone:
+对每个 SSL backbone：
 
 ```text
 parameter.requires_grad = False
@@ -20,42 +18,37 @@ backbone gradient = None
 backbone parameters are unchanged after optimizer.step()
 ```
 
-## Why both `requires_grad=False` and `eval()`?
+## 为什么同时使用 `requires_grad=False` 和 `eval()`？
 
-They solve different problems.
+它们解决不同的问题。
 
-`requires_grad=False` means:
+`requires_grad=False` 表示：
 
-> Do not compute/update parameter gradients.
+> 不计算或更新参数梯度。
 
-`eval()` means:
+`eval()` 表示：
 
-> Execute inference-time behavior for modules such as Dropout and
-> BatchNorm-like stateful layers.
+> 让 Dropout 和类似 BatchNorm 的有状态层按推理时的行为运行。
 
-Freezing parameters alone does not automatically call `eval()`.
+只冻结参数不会自动调用 `eval()`。
 
-## Why install an eval guard?
+## 为什么要安装 eval guard？
 
-A surrounding teacher model will normally call:
+外层 teacher 模型通常会调用：
 
 ```python
 teacher.train()
 ```
 
-PyTorch recursively switches child modules into train mode. Therefore a
-backbone that was previously set to `eval()` can be flipped back to
-`training=True`.
+PyTorch 会递归地将子模块切换到 train 模式。因此，先前设置为 `eval()` 的 backbone 可能又被切换为 `training=True`。
 
-P3-01 installs a forward-pre-hook that re-applies `eval()` immediately before
-every actual SSL forward. Thus the backbone computation always uses eval
-semantics while the trainable head remains in train mode.
+P3-01 安装 forward-pre-hook，在每次实际执行 SSL forward 之前重新调用 `eval()`。这样 backbone 计算始终采用 eval 语义，而可训练 head 仍处于 train 模式。
 
-## Optimizer rule
+## Optimizer 规则
 
-Never construct the optimizer with `model.parameters()` blindly.
+不要不加筛选地用 `model.parameters()` 创建 optimizer。
 
-Use:
+使用：
 
 ```python
 optimizer = torch.optim.AdamW(
@@ -64,7 +57,7 @@ optimizer = torch.optim.AdamW(
 )
 ```
 
-and validate:
+并验证：
 
 ```python
 assert_optimizer_excludes_backbone(
@@ -73,26 +66,25 @@ assert_optimizer_excludes_backbone(
 )
 ```
 
-## Integration pattern
+## 集成方式
 
-Immediately after loading a real SSL backbone:
+加载真实 SSL backbone 后立即执行：
 
 ```python
 backbone = build_ssl_backbone(...)
 freeze_ssl_backbone(backbone)
 ```
 
-Then only the P3 representation head / SCAF parameters remain trainable.
+之后仅 P3 representation head / SCAF 参数保持可训练。
 
 ## Gate
 
-P3-01 passes when:
+满足以下条件时，P3-01 通过：
 
-1. every backbone parameter has `requires_grad=False`;
-2. backbone forward uses eval mode even after parent `train()`;
-3. backbone gradients remain `None`;
-4. optimizer contains no backbone parameters;
-5. a real optimizer step leaves backbone parameters bitwise unchanged.
+1. 每个 backbone 参数的 `requires_grad=False`；
+2. 即使父模块调用 `train()`，backbone forward 仍使用 eval 模式；
+3. backbone 梯度始终为 `None`；
+4. optimizer 不包含 backbone 参数；
+5. 执行一次真实 optimizer step 后，backbone 参数逐位不变。
 
-The standalone smoke script validates the contract mechanics. P3-02 will bind
-this contract to the real Teacher / 64D representation head.
+独立 smoke script 验证契约机制。P3-02 会将此契约应用到真实 Teacher / 64D 表征 head。

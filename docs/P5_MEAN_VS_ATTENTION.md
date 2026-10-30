@@ -1,6 +1,6 @@
-# P5 — Mean DR vs Attention DR
+# P5 — Mean DR 与 Attention DR 对比
 
-P4 is closed and the sole feature source is frozen:
+P4 已完成，唯一特征来源已冻结：
 
 ```text
 microsoft/wavlm-large
@@ -9,7 +9,7 @@ outputs.hidden_states[15]
 frame dim = 1024
 ```
 
-The frame cache has already passed:
+帧级 cache 已通过检查：
 
 ```text
 train 3756
@@ -20,7 +20,7 @@ float32
 generic_test sealed
 ```
 
-P5 changes one factor only:
+P5 只改变一个因素：
 
 ```text
 Mean DR
@@ -28,7 +28,7 @@ vs
 Attention DR
 ```
 
-Both produce a 64D L2-normalized embedding and are trained with:
+两者都会生成 64D L2-normalized embedding，并采用以下设置训练：
 
 ```text
 SCAF K=3
@@ -43,7 +43,7 @@ seeds 17,29,43
 dev selection = prototype Macro-F1
 ```
 
-Attention DR is a minimal additive temporal attention:
+Attention DR 使用最简的加性时序 attention：
 
 ```text
 score_t = v^T tanh(W h_t)
@@ -53,19 +53,17 @@ Linear(1024 -> 64)
 L2 Norm
 ```
 
-## Important P5 reproduction gate
+## 重要的 P5 复现 Gate
 
-The Mean branch is the control. Its 3-seed mean should remain close to the P4
-WavLM[15] reference:
+Mean 分支作为 control，其 3-seed mean 应接近 P4 WavLM[15] 的参考值：
 
 ```text
 0.886472
 ```
 
-P5 allows at most an absolute 0.02 difference before the comparison is rejected
-for implementation/data-pipeline investigation.
+若绝对差异超过 0.02，则拒绝本次比较，并先调查实现或数据 pipeline。
 
-## Run
+## 运行
 
 ```powershell
 python -m unittest discover -s tests -v
@@ -75,10 +73,10 @@ python scripts/run_p5_mean_vs_attention.py --device cuda
 python scripts/aggregate_p5_mean_vs_attention.py
 ```
 
-The final script reports:
-- Mean 3-seed mean/std/95% CI
-- Attention 3-seed mean/std/95% CI
-- Mean reproduction difference vs P4
+最后一个脚本会报告：
+- Mean 的 3-seed mean/std/95% CI
+- Attention 的 3-seed mean/std/95% CI
+- Mean 相对 P4 的复现差异
 - Attention - Mean delta
-- selected DR method
-- generic_test remains sealed
+- 选定的 DR method
+- `generic_test` 仍保持封存

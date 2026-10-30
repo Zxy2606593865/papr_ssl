@@ -1,11 +1,10 @@
-# P2 Closure Report
+# P2 收尾报告
 
-## Final status
+## 最终状态
 
-**P2: PASS / CLOSED**, conditional only on the repository-wide test suite
-remaining green after merging the final policy files.
+**P2：PASS / CLOSED**；唯一条件是最终 policy files 合并后，仓库全量测试仍通过。
 
-## Completed scope
+## 已完成范围
 
 - P2-01: public dataset selection
 - P2-02: raw audits
@@ -19,24 +18,24 @@ remaining green after merging the final policy files.
 - P2-07D: phrase coverage audit
 - P2-07E: revised multi-view MDSC task policy
 
-## Final MDSC interpretation
+## 对 MDSC 的最终解读
 
-MDSC is not treated as a 3784-class phrase dataset.
+MDSC 不作为包含 3784 个类别的短语数据集处理。
 
-Frozen task views:
+冻结的 task views：
 
 - Core30: primary public dysarthria phrase benchmark
 - Command20: command-only diagnostic
 - WWS10: auxiliary 1-shot personalization benchmark
 - Long-tail dev/test: open-set/rejection evaluation
 
-No semantic synonym taxonomy is created in P2.
+P2 不创建语义同义词 taxonomy。
 
-## Handoff to P3
+## 交接给 P3
 
-P3 may consume only the frozen train views and must keep test sealed.
+P3 只能使用冻结的 train views，并必须保持 test 封存。
 
-Recommended first P3 experiment:
+建议首先执行以下 P3 实验：
 
 ```text
 Frozen SSL backbone
@@ -46,7 +45,7 @@ Frozen SSL backbone
 -> SCAF
 ```
 
-Start with the cleanest supervised views:
+从最清晰的监督视图开始：
 
 ```text
 GSC-35
@@ -54,5 +53,4 @@ MDSC-Core30
 MDSC-Command20 diagnostic
 ```
 
-Use MDSC-WWS10 and open-set rejection as evaluation protocols, not as the
-primary SCAF class inventory.
+将 MDSC-WWS10 和 open-set rejection 用作评估协议，而不是主要的 SCAF class inventory。
